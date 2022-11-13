@@ -1,0 +1,51 @@
+# _config.yml
+
+# Build settings
+remote_theme: briandrum/jekyll-theme-optima
+
+plugins:
+ - jekyll-feed
+ - jekyll-remote-theme
+ - jekyll-seo-tag
+
+# Title & description: https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
+title: Change-o Cubing Site
+author:
+  name: Preston
+description: > # this means to ignore newlines until "show_excerpts:"
+
+permalink: /:categories/:year/:month/:day/:title/
+
+#paginate: 5
+#paginate_path: "/posts/page:num/"
+
+show_excerpts: false # set to true to show excerpts on the homepage
+excerpt_separator: <!--more-->
+
+# Optima date format
+# refer to https://shopify.github.io/liquid/filters/date/ if you want to customize this
+optima:
+  date_format: "%b %-d, %Y"
+
+  # generate social links in footer
+  # social_links:
+  #   facebook:
+  #     page: jekyll
+  #     group: jekyll
+  #   github:  jekyll
+  #   instagram: jekyll
+  #   linkedin: jekyll
+  #   twitter: jekyllrb
+
+  # add some fine print in footer
+  fine_prints:
+    - text: "Copyright © 2022."
+    - text: "All rights reserved."
+
+# If you want to link only specific pages in your header, uncomment
+# this and add the path to the pages in order as they should show up
+header_pages:
+#  - index.md
+#  - posts.md
+#  - about.md
+#  - search.md
