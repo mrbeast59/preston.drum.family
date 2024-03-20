@@ -1,54 +1,157 @@
-# _config.yml
+################################################################################
+#                                                                              #
+# Jekyll Configuration Settings                                                #
+#                                                                              #
+################################################################################
 
-# Build settings
-remote_theme: briandrum/jekyll-theme-optima
+# baseurl: /jekyll4-theme-optima
+
+permalink: /:categories/:year-:month-:day-:title/
+
+# defaults:
+#   - scope:
+#       path: "notes"
+#       type: posts
+#     values:
+#       permalink: notes/:title
 
 plugins:
- - jekyll-feed
- - jekyll-remote-theme
- - jekyll-seo-tag
+#   - jekyll-archives
+  - jekyll-feed
+#   - jekyll-paginate-v2
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
 
-# Title & description: https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
-title: Change-o Cubing Site
-author:
-  name: Preston
+timezone: America/New_York
+
+remote_theme: briandrum/jekyll4-theme-optima
+
+title: Preston’s Site
+
 description: > # this means to ignore newlines until "show_excerpts:"
 
-permalink: /:categories/:year/:month/:day/:title/
+################################################################################
+#                                                                              #
+# Well-known                                                                   #
+#                                                                              #
+################################################################################
 
-#paginate: 5
-#paginate_path: "/posts/page:num/"
+# include: [".well-known"]
 
-show_excerpts: false # set to true to show excerpts on the homepage
-excerpt_separator: <!--more-->
+################################################################################
+#                                                                              #
+# Jekyll Archives                                                              #
+#                                                                              #
+################################################################################
 
-# Plausible analytics: https://plausible.io/
-plausible_analytics: drum.family
+# jekyll-archives:
+#   enabled:
+#     - year
+#     - month
+#     - day
+#     - tags
+#   layouts:
+#     year: archive-year
+#     month: archive-month
+#     day: archive-day
+#     tag: archive-tag
+#   permalinks:
+#     year: '/archive/:year/'
+#     month: '/archive/:year/:month/'
+#     day: '/archive/:year/:month/:day/'
+#     tag: '/tag/:name/'
 
-# Optima date format
-# refer to https://shopify.github.io/liquid/filters/date/ if you want to customize this
+################################################################################
+#                                                                              #
+# Jekyll Paginate v2                                                           #
+#                                                                              #
+################################################################################
+
+# pagination:
+#   enabled: true
+#   per_page: 3
+#   permalink: '/:num/'
+#   title: ':title - page :num of :max'
+#   limit: 0
+
+################################################################################
+#                                                                              #
+# Optima Theme Configuration Settings                                          #
+#                                                                              #
+################################################################################
+
 optima:
-  date_format: "%b %-d, %Y"
+  # Optima date formats
+  # Refer to https://shopify.github.io/liquid/filters/date/ if you want to
+  # customize these.
+  #
+  time_and_date_short_format: "%-I:%M %P - %-d %b %Y"
 
-  # generate social links in footer
-  # social_links:
-  #   facebook:
-  #     page: jekyll
-  #     group: jekyll
-  #   github:  jekyll
-  #   instagram: jekyll
-  #   linkedin: jekyll
-  #   twitter: jekyllrb
+  # Plausible analytics: https://plausible.io/
+  #
+  plausible_analytics: drum.family
+
+  post_categories:
+
+    articles:
+      enabled: false
+
+    journal:
+      enabled: false
+
+    notes:
+      enabled: false
+
+  # If you want to link only specific pages in your header, uncomment this and
+  # add the path to the pages in order as they should show up.
+  #
+  header_pages:
+    - pages/home.md
+    - pages/drone.md
+#     - journal
+#     - notes
+#     - articles
+#     - pages/now.md
+#     - pages/about.md
+#     - pages/search.md
+
+  # If you want to link only specific pages in your footer, uncomment this and
+  # add the path to the pages in order as they should show up.
+  #
+  footer_pages:
+    - pages/home.md
+    - pages/drone.md
+#     - journal
+#     - notes
+#     - articles
+#     - pages/archives.md
+#     - pages/now.md
+#     - pages/about.md
+#     - pages/search.md
+#     - pages/analytics.md
+
+  # Generate social links in footer.
+  #
+  social_links:
+  #   - { platform: mastodon,       user_name: "@brian@briandrum.net",    user_url: "https://mastodon.social/@briandrum" }
+  #   - { platform: github,         user_name: "briandrum",               user_url: "https://github.com/briandrum" }
+  #   - { platform: linkedin,       user_name: "briandrum",               user_url: "https://www.linkedin.com/in/briandrum" }
+  #   - { platform: dribbble,       user_name: "briandrum",               user_url: "https://dribbble.com/briandrum" }
+  #   - { platform: devto,          user_name: "jekyll",                  user_url: "https://dev.to/jekyll" }
+  #   - { platform: facebook,       user_name: "jekyll",                  user_url: "https://www.facebook.com/jekyll" }
+  #   - { platform: flickr,         user_name: "jekyll",                  user_url: "https://www.flickr.com/photos/jekyll" }
+  #   - { platform: google_scholar, user_name: "jekyll",                  user_url: "https://scholar.google.com/citations?user=qc6CJjYAAAAJ" }
+  #   - { platform: instagram,      user_name: "jekyll",                  user_url: "https://www.instagram.com/jekyll" }
+  #   - { platform: keybase,        user_name: "jekyll",                  user_url: "https://keybase.io/jekyll" }
+  #   - { platform: microdotblog,   user_name: "jekyll",                  user_url: "https://micro.blog/jekyll" }
+  #   - { platform: pinterest,      user_name: "jekyll",                  user_url: "https://www.pinterest.com/jekyll" }
+  #   - { platform: stackoverflow,  user_name: "jekyll",                  user_url: "https://stackoverflow.com/users/1234567/jekyll" }
+  #   - { platform: telegram,       user_name: "jekyll",                  user_url: "https://t.me/jekyll" }
+  #   - { platform: twitter,        user_name: "@jekyllrb",               user_url: "https://twitter.com/jekyllrb" }
+  #   - { platform: youtube,        user_name: "jekyll",                  user_url: "https://www.youtube.com/jekyll" }
 
   # add some fine print in footer
   fine_prints:
     - text: "Copyright © 2022."
     - text: "All rights reserved."
-
-# If you want to link only specific pages in your header, uncomment
-# this and add the path to the pages in order as they should show up
-header_pages:
-#  - index.md
-#  - posts.md
-#  - about.md
-#  - search.md

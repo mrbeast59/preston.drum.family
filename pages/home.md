@@ -1,7 +1,8 @@
 ---
-layout: home
+layout: page
+short_title: Home
 title: Home
-list_title: "Recent posts"
+permalink: /
 ---
 
 ## Rubik's Cube
