@@ -122,7 +122,7 @@ optima:
   footer_pages:
     - pages/home.md
     - pages/drone.md
-    - pages/math-practice.md
+#    - pages/math-practice.md
 #     - journal
 #     - notes
 #     - articles
