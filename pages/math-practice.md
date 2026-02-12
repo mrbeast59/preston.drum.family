@@ -1,5 +1,7 @@
 ---
 layout: page
+short_title: " "
+title: ""
 permalink: /math-work/eea07153-c8c1-46d8-95c7-d13cc86e93d1
 ---
 
