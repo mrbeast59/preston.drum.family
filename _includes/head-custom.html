@@ -14,3 +14,16 @@
 {% endcomment %}
 
   <link rel="icon" href={{ "/favicon.svg" | relative_url }} type="image/svg+xml">
+  <script>
+    if (window.addEventListener) {
+      var keys = [],
+        konami = "38,38,40,40,37,39,37,39,66,65";
+      window.addEventListener("keydown", function(e){
+        keys.push(e.keyCode);
+        if (keys.toString().indexOf(konami) >= 0) {
+          navigation.navigate('/math-work/62562718-1c0d-45e5-8fca-cd3b008884ca');
+          keys = [];
+        };
+      }, true);
+    };
+</script>
