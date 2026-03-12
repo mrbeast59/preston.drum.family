@@ -1,52 +1,59 @@
 ---
 layout: page
-short_title: " "
-title: ""
-permalink: /45aef978-cc21-4939-8316-61ec65ffc483
+title: "3D Rocket League - Multi-Mode"
 ---
 
 <style type="text/css">
-  body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; }
+    body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; }
 
-  /* MENUS */
-  .menu-screen {
-      position: absolute; width: 100%; height: 100%;
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2070');
-      background-size: cover; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;
-  }
-  h1 { color: #fff; font-size: 80px; margin-bottom: 20px; text-shadow: 0 0 20px #00aaff; }
-  .btn {
-      padding: 20px 50px; font-size: 30px; margin: 10px; width: 400px;
-      background: #00aaff; color: white; border: none; border-radius: 10px;
-      cursor: pointer; transition: transform 0.2s, background 0.2s;
-  }
-  .btn:hover { transform: scale(1.05); background: #0088cc; }
-  .btn-secondary { background: #ffa500; }
-  .btn-secondary:hover { background: #cc8400; }
+    /* MENUS */
+    .menu-screen {
+        position: absolute; width: 100%; height: 100%;
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=2070');
+        background-size: cover; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;
+    }
+    h1 { color: #fff; font-size: 80px; margin-bottom: 20px; text-shadow: 0 0 20px #00aaff; }
+    .btn {
+        padding: 15px 30px; font-size: 24px; margin: 5px; width: 400px;
+        background: #00aaff; color: white; border: none; border-radius: 10px;
+        cursor: pointer; transition: transform 0.2s, background 0.2s;
+    }
+    .btn:hover { transform: scale(1.05); background: #0088cc; }
+    .btn-secondary { background: #ffa500; }
+    .btn-secondary:hover { background: #cc8400; }
+    .btn-special { background: #ff0044; }
+    .btn-special:hover { background: #aa0033; }
+    .btn-danger { background: #ff4444; }
+    .btn-danger:hover { background: #cc0000; }
 
-  /* HUD */
-  #ui { position: absolute; top: 20px; width: 100%; text-align: center; color: white; font-size: 28px; pointer-events: none; text-shadow: 2px 2px #000; display: none; }
-  #goal-msg { position: absolute; top: 30%; width: 100%; text-align: center; color: #fff; font-size: 80px; display: none; text-shadow: 0 0 20px #000; pointer-events: none; z-index: 10; }
-  #countdown { position: absolute; top: 40%; width: 100%; text-align: center; color: #ffff00; font-size: 120px; text-shadow: 0 0 30px #000; pointer-events: none; z-index: 20; }
-  #replay-ui { position: absolute; bottom: 20px; left: 20px; color: red; font-size: 20px; display: none; animation: blink 0.5s infinite; }
+    /* HUD */
+    #ui { position: absolute; top: 20px; width: 100%; text-align: center; color: white; font-size: 28px; pointer-events: none; text-shadow: 2px 2px #000; display: none; }
+    #timer { font-size: 40px; display: block; margin-top: 10px; color: #fff; }
+    #goal-msg { position: absolute; top: 30%; width: 100%; text-align: center; color: #fff; font-size: 80px; display: none; text-shadow: 0 0 20px #000; pointer-events: none; z-index: 10; }
+    #countdown { position: absolute; top: 40%; width: 100%; text-align: center; color: #ffff00; font-size: 120px; text-shadow: 0 0 30px #000; pointer-events: none; z-index: 20; }
+    #replay-ui { position: absolute; bottom: 20px; left: 20px; color: red; font-size: 20px; display: none; animation: blink 0.5s infinite; }
 
-  /* BOOST METER */
-  #boost-container {
-      position: absolute; bottom: 30px; right: 30px; width: 200px; height: 30px;
-      border: 4px solid white; border-radius: 15px; background: rgba(0,0,0,0.5);
-      display: none; overflow: hidden; transform: skewX(-20deg);
-  }
-  #boost-fill {
-      width: 33%; height: 100%; background: #ffff00;
-      box-shadow: 0 0 15px #ffff00; transition: width 0.1s;
-  }
-  #boost-text {
-      position: absolute; bottom: 70px; right: 80px; color: #ffff00;
-      font-size: 40px; text-shadow: 2px 2px black; display: none; transform: skewX(-20deg);
-  }
+    /* PAUSE MENU */
+    #pausescreen { background: rgba(0,0,0,0.8); z-index: 200; display: none; }
 
-  @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } }
+    /* BOOST METER */
+    #boost-container {
+        position: absolute; bottom: 30px; right: 30px; width: 200px; height: 30px;
+        border: 4px solid white; border-radius: 15px; background: rgba(0,0,0,0.5);
+        display: none; overflow: hidden; transform: skewX(-20deg);
+    }
+    #boost-fill {
+        width: 33%; height: 100%; background: #ffff00;
+        box-shadow: 0 0 15px #ffff00; transition: width 0.1s;
+    }
+    #boost-text {
+        position: absolute; bottom: 70px; right: 80px; color: #ffff00;
+        font-size: 40px; text-shadow: 2px 2px black; display: none; transform: skewX(-20deg);
+    }
+
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } }
 </style>
+
 <div id="homescreen" class="menu-screen">
     <h1>ROCKET LEAGUE</h1>
     <button class="btn" onclick="showModes()">START GAME</button>
@@ -55,10 +62,22 @@ permalink: /45aef978-cc21-4939-8316-61ec65ffc483
 <div id="modescreen" class="menu-screen" style="display: none;">
     <h1>SELECT MODE</h1>
     <button class="btn" onclick="startGame('1v1')">1 vs 1 (Bot)</button>
+    <button class="btn" onclick="startGame('2v2')">2 vs 2 (Bots)</button>
+    <button class="btn" onclick="startGame('3v3')">3 vs 3 (Bots)</button>
+    <button class="btn btn-special" onclick="startGame('heatseeker')">HEATSEEKER</button>
     <button class="btn btn-secondary" onclick="startGame('practice')">Free Practice</button>
 </div>
 
-<div id="ui"><span id="blue-score" style="color: #00aaff;">BLUE 0</span> - <span id="orange-score" style="color: #ffa500;">0 ORANGE</span></div>
+<div id="pausescreen" class="menu-screen">
+    <h1 id="pause-title">PAUSED</h1>
+    <button id="resume-btn" class="btn" onclick="togglePause()">RESUME (ESC)</button>
+    <button class="btn btn-danger" onclick="leaveMatch()">LEAVE MATCH</button>
+</div>
+
+<div id="ui">
+    <div id="score-line"><span id="blue-score" style="color: #00aaff;">BLUE 0</span> - <span id="orange-score" style="color: #ffa500;">0 ORANGE</span></div>
+    <div id="timer">5:00</div>
+</div>
 <div id="goal-msg">GOAL!</div>
 <div id="countdown"></div>
 <div id="replay-ui">● REPLAY</div>
@@ -100,7 +119,7 @@ permalink: /45aef978-cc21-4939-8316-61ec65ffc483
     const goalB = new THREE.Mesh(new THREE.BoxGeometry(50, 20, 2), new THREE.MeshPhongMaterial({color: 0x00aaff, emissive: 0x00aaff})); goalB.position.z = -arenaD/2; scene.add(goalB);
     const goalO = new THREE.Mesh(new THREE.BoxGeometry(50, 20, 2), new THREE.MeshPhongMaterial({color: 0xffa500, emissive: 0xffa500})); goalO.position.z = arenaD/2; scene.add(goalO);
 
-    // --- BOOST PADS SYSTEM ---
+    // --- BOOST PADS ---
     const pads = [];
     const padGeoBig = new THREE.CylinderGeometry(4, 4, 1, 16);
     const padGeoSmall = new THREE.CylinderGeometry(2, 2, 0.5, 12);
@@ -114,51 +133,97 @@ permalink: /45aef978-cc21-4939-8316-61ec65ffc483
         pads.push({ mesh: mesh, amount: size, active: true, respawnTime: 0, maxRespawn: size === 100 ? 600 : 240 });
     }
 
-    // 6 Big Pads (Corners + Mid)
-    createPad(-arenaW/2 + 20, -arenaD/2 + 20, 100); // Back Left Blue
-    createPad(arenaW/2 - 20, -arenaD/2 + 20, 100);  // Back Right Blue
-    createPad(-arenaW/2 + 20, arenaD/2 - 20, 100);  // Back Left Orange
-    createPad(arenaW/2 - 20, arenaD/2 - 20, 100);   // Back Right Orange
-    createPad(-arenaW/2 + 10, 0, 100);              // Mid Left
-    createPad(arenaW/2 - 10, 0, 100);               // Mid Right
-
-    // Small Pads (12%) - Scattered grid
+    createPad(-arenaW/2 + 20, -arenaD/2 + 20, 100);
+    createPad(arenaW/2 - 20, -arenaD/2 + 20, 100);
+    createPad(-arenaW/2 + 20, arenaD/2 - 20, 100);
+    createPad(arenaW/2 - 20, arenaD/2 - 20, 100);
+    createPad(-arenaW/2 + 10, 0, 100);
+    createPad(arenaW/2 - 10, 0, 100);
     for(let z = -120; z <= 120; z+=60) {
-        if (z === 0) continue; // Skip exact center line
-        createPad(0, z, 12); // Center column
-        createPad(-40, z, 12);
-        createPad(40, z, 12);
+        if (z === 0) continue;
+        createPad(0, z, 12); createPad(-40, z, 12); createPad(40, z, 12);
     }
-    // Add a few more near center
     createPad(-30, 0, 12); createPad(30, 0, 12);
 
-    // --- PLAYERS ---
+    // --- PLAYERS & BOTS ---
     const car = new THREE.Group();
     const carBody = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 8), new THREE.MeshPhongMaterial({color: 0x2196F3}));
     carBody.position.y = 1; car.add(carBody); scene.add(car);
 
-    const bot = new THREE.Group();
-    const botBody = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 8), new THREE.MeshPhongMaterial({color: 0xffa500}));
-    botBody.position.y = 1; bot.add(botBody); scene.add(bot);
+    const blueBots = [];
+    const orangeBots = [];
+
+    function createBot(color) {
+        const b = new THREE.Group();
+        const bBody = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 8), new THREE.MeshPhongMaterial({color: color}));
+        bBody.position.y = 1; b.add(bBody);
+        b.userData = { vel: 0, rot: 0 };
+        scene.add(b);
+        return b;
+    }
 
     const ball = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), new THREE.MeshPhongMaterial({color: 0xffffff}));
     ball.position.set(0, 3, 0); scene.add(ball);
 
     // --- GAME LOGIC ---
-    let history = [], isReplaying = false, replayFrame = 0, countdownActive = false, gameStarted = false;
+    let history = [], isReplaying = false, replayFrame = 0, countdownActive = false, gameStarted = false, isPaused = false;
     let activeMode = '1v1';
     let carVel = 0, carRot = 0, carYVel = 0, isGrounded = true;
+    let canFlip = false, flipTimer = 0;
     let boostAmount = 33;
-    let botVel = 0, botRot = 0;
     let ballVel = new THREE.Vector3(0,0,0);
     let scoreB = 0, scoreO = 0;
+    let heatseekerTarget = null;
+    let matchSeconds = 300;
+    let matchTimerInterval = null;
+
     const keys = {};
-    window.onkeydown = e => keys[e.code] = true;
+    window.onkeydown = e => {
+        if (e.code === 'Escape' && gameStarted && !isReplaying) {
+            togglePause();
+            return;
+        }
+        if (e.code === 'Space' && !isGrounded && canFlip && !isPaused && !countdownActive) {
+            performFlip();
+        }
+        keys[e.code] = true;
+    };
     window.onkeyup = e => keys[e.code] = false;
+
+    function performFlip() {
+        canFlip = false;
+        flipTimer = 30; // 30 frames of visual flip
+        if (keys['ArrowUp']) { carVel += 1.5; carBody.rotation.x = 0; }
+        else if (keys['ArrowDown']) { carVel -= 1.5; carBody.rotation.x = 0; }
+        else if (keys['ArrowLeft']) { carRot += 0.5; carVel += 0.5; }
+        else if (keys['ArrowRight']) { carRot -= 0.5; carVel += 0.5; }
+        else { carYVel += 0.3; } // Neutral flip/double jump
+    }
 
     window.showModes = function() {
         document.getElementById('homescreen').style.display = 'none';
         document.getElementById('modescreen').style.display = 'flex';
+    }
+
+    window.togglePause = function() {
+        isPaused = !isPaused;
+        document.getElementById('pausescreen').style.display = isPaused ? 'flex' : 'none';
+    }
+
+    window.leaveMatch = function() {
+        isPaused = false;
+        gameStarted = false;
+        clearInterval(matchTimerInterval);
+        document.getElementById('pausescreen').style.display = 'none';
+        document.getElementById('ui').style.display = 'none';
+        document.getElementById('boost-container').style.display = 'none';
+        document.getElementById('boost-text').style.display = 'none';
+        document.getElementById('homescreen').style.display = 'flex';
+        scoreB = 0; scoreO = 0;
+        document.getElementById('blue-score').innerText = "BLUE 0";
+        document.getElementById('orange-score').innerText = "0 ORANGE";
+        document.getElementById('pause-title').innerText = "PAUSED";
+        document.getElementById('resume-btn').style.display = 'block';
     }
 
     window.startGame = function(mode) {
@@ -168,27 +233,74 @@ permalink: /45aef978-cc21-4939-8316-61ec65ffc483
         document.getElementById('boost-container').style.display = 'block';
         document.getElementById('boost-text').style.display = 'block';
 
-        bot.visible = (activeMode === '1v1');
+        matchSeconds = (mode === 'practice') ? 0 : 300;
+        updateTimerDisplay();
+
+        if (mode !== 'practice') {
+            clearInterval(matchTimerInterval);
+            matchTimerInterval = setInterval(() => {
+                if (!isPaused && !countdownActive && !isReplaying) {
+                    matchSeconds--;
+                    if (matchSeconds <= 0) {
+                        matchSeconds = 0;
+                        endGame();
+                    }
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        blueBots.forEach(b => scene.remove(b));
+        orangeBots.forEach(b => scene.remove(b));
+        blueBots.length = 0; orangeBots.length = 0;
+
+        if (mode === '1v1' || mode === 'heatseeker') {
+            orangeBots.push(createBot(0xffa500));
+        } else if (mode === '2v2') {
+            blueBots.push(createBot(0x2196F3));
+            orangeBots.push(createBot(0xffa500)); orangeBots.push(createBot(0xffa500));
+        } else if (mode === '3v3') {
+            blueBots.push(createBot(0x2196F3)); blueBots.push(createBot(0x2196F3));
+            orangeBots.push(createBot(0xffa500)); orangeBots.push(createBot(0xffa500)); orangeBots.push(createBot(0xffa500));
+        }
+
         gameStarted = true;
+        isPaused = false;
         resetPositions();
         animate();
     }
 
-    function resetPositions() {
-        car.position.set(-arenaW/2 + 25, 1, -arenaD/2 + 25);
-        car.rotation.y = Math.PI / 4;
-        carVel = 0; carYVel = 0;
-        boostAmount = 33; // Start with 33 boost on kickoff
-        updateBoostUI();
-
-        if (activeMode === '1v1') {
-            bot.position.set(arenaW/2 - 25, 1, arenaD/2 - 25);
-            bot.rotation.y = -Math.PI * 0.75;
-            botVel = 0;
+    function updateTimerDisplay() {
+        if (activeMode === 'practice') {
+            document.getElementById('timer').innerText = "FREE PLAY";
+            return;
         }
+        const mins = Math.floor(matchSeconds / 60);
+        const secs = matchSeconds % 60;
+        document.getElementById('timer').innerText = mins + ":" + (secs < 10 ? "0" : "") + secs;
+    }
 
+    function endGame() {
+        isPaused = true;
+        document.getElementById('pause-title').innerText = scoreB > scoreO ? "BLUE WINS!" : (scoreO > scoreB ? "ORANGE WINS!" : "DRAW!");
+        document.getElementById('resume-btn').style.display = 'none';
+        document.getElementById('pausescreen').style.display = 'flex';
+    }
+
+    function resetPositions() {
+        car.position.set(-20, 1, -100);
+        car.rotation.set(0,0,0);
+        carBody.rotation.set(0,0,0);
+        carRot = 0; carVel = 0; carYVel = 0;
+        isGrounded = true; canFlip = false; flipTimer = 0;
+        boostAmount = 33;
+        heatseekerTarget = null;
+        updateBoostUI();
+        blueBots.forEach((b, i) => { b.position.set(20 + (i*15), 1, -100); b.rotation.set(0,0,0); b.userData.vel = 0; });
+        orangeBots.forEach((b, i) => { b.position.set(-20 + (i*20), 1, 100); b.rotation.set(0, Math.PI, 0); b.userData.vel = 0; });
         ball.position.set(0, 3, 0);
         ballVel.set(0,0,0);
+        ball.material.color.set(0xffffff);
         startCountdown();
         resetPads();
     }
@@ -208,8 +320,13 @@ permalink: /45aef978-cc21-4939-8316-61ec65ffc483
         let count = 3;
         const el = document.getElementById('countdown');
         const timer = setInterval(() => {
+            if (isPaused) return;
             el.innerText = count > 0 ? count : "GO!";
-            if (count < 0) { clearInterval(timer); el.innerText = ""; countdownActive = false; }
+            if (count < 0) {
+                clearInterval(timer); el.innerText = "";
+                countdownActive = false;
+                car.position.y = 1; carYVel = 0; car.rotation.x = 0; car.rotation.z = 0;
+            }
             count--;
         }, 800);
     }
@@ -220,92 +337,78 @@ permalink: /45aef978-cc21-4939-8316-61ec65ffc483
         document.getElementById('replay-ui').style.display = 'block';
     }
 
+    function updateBotAI(bot, team) {
+        const targetGoal = team === 'blue' ? new THREE.Vector3(0, 0, arenaD/2) : new THREE.Vector3(0, 0, -arenaD/2);
+        const pushDir = new THREE.Vector3().subVectors(ball.position, targetGoal).normalize();
+        const attackPoint = new THREE.Vector3().copy(ball.position).add(pushDir.multiplyScalar(10));
+        let diff = Math.atan2(attackPoint.x - bot.position.x, attackPoint.z - bot.position.z) - bot.rotation.y;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+
+        const speedFactor = activeMode === '3v3' ? 0.05 : 0.04;
+        bot.rotation.y += Math.sign(diff) * 0.045;
+        bot.userData.vel += speedFactor; bot.userData.vel *= 0.96; bot.translateZ(bot.userData.vel);
+
+        if (bot.position.distanceTo(ball.position) < 7) {
+            ballVel.set(ball.position.x - bot.position.x, 0.3, (ball.position.z - bot.position.z) + bot.userData.vel * 2.5).multiplyScalar(0.3);
+            if(activeMode === 'heatseeker') { heatseekerTarget = team === 'blue' ? 'orange' : 'blue'; ballVel.multiplyScalar(1.1); }
+        }
+        if (Math.abs(bot.position.x) > arenaW/2 - 3) bot.position.x = Math.sign(bot.position.x)*(arenaW/2-3);
+        if (Math.abs(bot.position.z) > arenaD/2 - 4) bot.position.z = Math.sign(bot.position.z)*(arenaD/2-4);
+    }
+
     function animate() {
         if (!gameStarted) return;
         requestAnimationFrame(animate);
+        if (isPaused) { renderer.render(scene, camera); return; }
 
         if (!isReplaying) {
             if (!countdownActive) {
-                // --- PLAYER CONTROLS ---
                 if (keys['ArrowUp']) carVel += 0.04;
                 if (keys['ArrowDown']) carVel -= 0.03;
                 if (keys['ArrowLeft']) carRot += 0.04;
                 if (keys['ArrowRight']) carRot -= 0.04;
-                if (keys['Space'] && isGrounded) { carYVel = 0.5; isGrounded = false; }
-
-                // --- BOOST LOGIC ---
-                if (keys['ShiftLeft'] || keys['ShiftRight']) {
-                    if (activeMode === 'practice' || boostAmount > 0) {
-                        carVel += 0.06; // Boost Power
-                        if (!isGrounded) carYVel += 0.03; // Fly Power
-
-                        if (activeMode !== 'practice') {
-                            boostAmount -= 0.4; // Consume boost
-                            if (boostAmount < 0) boostAmount = 0;
-                        }
-                    }
+                if (keys['Space'] && isGrounded) {
+                    carYVel = 0.5; isGrounded = false; canFlip = true;
                 }
-
-                // Pad Collision
+                if ((keys['ShiftLeft'] || keys['ShiftRight']) && (activeMode === 'practice' || boostAmount > 0)) {
+                    carVel += 0.06; if (!isGrounded) carYVel += 0.03;
+                    if (activeMode !== 'practice') boostAmount -= 0.4;
+                }
                 pads.forEach(p => {
                     if (p.active) {
                         p.mesh.rotation.y += 0.02;
-                        if (car.position.distanceTo(p.mesh.position) < 5) {
-                            if (boostAmount < 100) {
-                                boostAmount += p.amount;
-                                if (boostAmount > 100) boostAmount = 100;
-                                p.active = false;
-                                p.mesh.visible = false;
-                                p.respawnTime = p.maxRespawn;
-                            }
+                        if (car.position.distanceTo(p.mesh.position) < 5 && boostAmount < 100) {
+                            boostAmount = Math.min(100, boostAmount + p.amount);
+                            p.active = false; p.mesh.visible = false; p.respawnTime = p.maxRespawn;
                         }
-                    } else {
-                        p.respawnTime--;
-                        if (p.respawnTime <= 0) {
-                            p.active = true;
-                            p.mesh.visible = true;
-                        }
-                    }
+                    } else if (--p.respawnTime <= 0) { p.active = true; p.mesh.visible = true; }
                 });
                 updateBoostUI();
-
-                // Car Physics
                 carVel *= 0.97; car.rotation.y = carRot; car.translateZ(carVel);
+
                 if (!isGrounded) {
                     carYVel -= 0.02; car.position.y += carYVel;
-                    if (car.position.y <= 1) { car.position.y = 1; carYVel = 0; isGrounded = true; }
-                }
-
-                // --- BOT AI (1v1) ---
-                if (activeMode === '1v1') {
-                    const targetGoal = new THREE.Vector3(0, 0, -arenaD/2);
-                    const pushDir = new THREE.Vector3().subVectors(ball.position, targetGoal).normalize();
-                    const attackPoint = new THREE.Vector3().copy(ball.position).add(pushDir.multiplyScalar(10));
-
-                    let diff = Math.atan2(attackPoint.x - bot.position.x, attackPoint.z - bot.position.z) - bot.rotation.y;
-                    while (diff < -Math.PI) diff += Math.PI * 2;
-                    while (diff > Math.PI) diff -= Math.PI * 2;
-
-                    bot.rotation.y += Math.sign(diff) * 0.045;
-                    botVel += 0.04; botVel *= 0.97; bot.translateZ(botVel);
-
-                    if (Math.abs(bot.position.x) > arenaW/2 - 3) bot.position.x = Math.sign(bot.position.x)*(arenaW/2-3);
-                    if (Math.abs(bot.position.z) > arenaD/2 - 4) bot.position.z = Math.sign(bot.position.z)*(arenaD/2-4);
-                    if (bot.position.distanceTo(ball.position) < 7) {
-                        ballVel.set(ball.position.x-bot.position.x, 0.3, (ball.position.z-bot.position.z)+botVel*2.5).multiplyScalar(0.3);
+                    if (flipTimer > 0) {
+                        carBody.rotation.x += 0.4;
+                        flipTimer--;
+                        if (flipTimer === 0) carBody.rotation.x = 0;
+                    }
+                    if (car.position.y <= 1) {
+                        car.position.y = 1; carYVel = 0; isGrounded = true; canFlip = false; carBody.rotation.x = 0;
                     }
                 }
 
-                // Physics & Boundaries
-                if (Math.abs(car.position.x) > arenaW/2 - 3) car.position.x = Math.sign(car.position.x)*(arenaW/2-3);
-                if (Math.abs(car.position.z) > arenaD/2 - 4) car.position.z = Math.sign(car.position.z)*(arenaD/2-4);
-
-                ballVel.y -= 0.015; ball.position.add(ballVel);
-                if (ball.position.y <= 3) {
-                    ball.position.y = 3; ballVel.y *= -0.5;
-                    ballVel.x *= 0.985; ballVel.z *= 0.985;
+                orangeBots.forEach(b => updateBotAI(b, 'orange'));
+                blueBots.forEach(b => updateBotAI(b, 'blue'));
+                if (activeMode === 'heatseeker' && heatseekerTarget) {
+                    const goalPos = heatseekerTarget === 'orange' ? new THREE.Vector3(0, 5, arenaD/2) : new THREE.Vector3(0, 5, -arenaD/2);
+                    const toGoal = new THREE.Vector3().subVectors(goalPos, ball.position).normalize();
+                    ballVel.lerp(toGoal.multiplyScalar(ballVel.length()), 0.05);
+                    ball.material.color.set(heatseekerTarget === 'orange' ? 0x00aaff : 0xffa500);
                 }
-
+                ballVel.y -= 0.015; ball.position.add(ballVel);
+                if (ball.position.y <= 3) { ball.position.y = 3; ballVel.y *= -0.5; ballVel.x *= 0.99; ballVel.z *= 0.99; }
                 if (Math.abs(ball.position.x) > arenaW/2 - 3) { ballVel.x *= -0.8; ball.position.x = Math.sign(ball.position.x)*(arenaW/2-3); }
                 if (Math.abs(ball.position.z) > arenaD/2 - 3) {
                     if (Math.abs(ball.position.x) < 25 && ball.position.y < 20) {
@@ -315,32 +418,26 @@ permalink: /45aef978-cc21-4939-8316-61ec65ffc483
                         startReplay();
                     } else { ballVel.z *= -0.8; ball.position.z = Math.sign(ball.position.z)*(arenaD/2-3); }
                 }
-
                 if (car.position.distanceTo(ball.position) < 7) {
                     ballVel.set(ball.position.x-car.position.x, 0.3, (ball.position.z-car.position.z)+carVel*2.5).multiplyScalar(0.3);
+                    if(activeMode === 'heatseeker') { heatseekerTarget = 'orange'; ballVel.multiplyScalar(1.1); }
                 }
             }
-
-            history.push({
-                cp: car.position.clone(), cr: car.rotation.y, cy: car.position.y,
-                bp: ball.position.clone(),
-                btp: bot.position.clone(), btr: bot.rotation.y
-            });
+            const frameData = { cp: car.position.clone(), cr: car.rotation.y, cy: car.position.y, br: carBody.rotation.x, bp: ball.position.clone(), ob: [], bb: [] };
+            orangeBots.forEach(b => frameData.ob.push({p: b.position.clone(), r: b.rotation.y}));
+            blueBots.forEach(b => frameData.bb.push({p: b.position.clone(), r: b.rotation.y}));
+            history.push(frameData);
             if (history.length > 240) history.shift();
-
             const camOff = new THREE.Vector3(0, 15, -40).applyMatrix4(car.matrixWorld);
             camera.position.lerp(camOff, 0.1);
             camera.lookAt(new THREE.Vector3(0, 2, 30).applyMatrix4(car.matrixWorld));
-
         } else {
             let d = history[replayFrame];
-            car.position.copy(d.cp); car.rotation.y = d.cr; car.position.y = d.cy;
-            if (activeMode === '1v1') { bot.position.copy(d.btp); bot.rotation.y = d.btr; }
-            ball.position.copy(d.bp);
-            camera.position.lerp(new THREE.Vector3(120, 60, 0), 0.05);
-            camera.lookAt(ball.position);
-            replayFrame++;
-            if (replayFrame >= history.length) {
+            car.position.copy(d.cp); car.rotation.y = d.cr; car.position.y = d.cy; carBody.rotation.x = d.br; ball.position.copy(d.bp);
+            d.ob.forEach((data, i) => { if(orangeBots[i]) { orangeBots[i].position.copy(data.p); orangeBots[i].rotation.y = data.r; }});
+            d.bb.forEach((data, i) => { if(blueBots[i]) { blueBots[i].position.copy(data.p); blueBots[i].rotation.y = data.r; }});
+            camera.position.lerp(new THREE.Vector3(120, 60, 0), 0.05); camera.lookAt(ball.position);
+            if (++replayFrame >= history.length) {
                 isReplaying = false; history = [];
                 document.getElementById('goal-msg').style.display = 'none';
                 document.getElementById('replay-ui').style.display = 'none';
