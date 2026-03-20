@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: game
 title: "3D Rocket League - Multi-Mode"
 ---
 
