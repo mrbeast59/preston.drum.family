@@ -20,68 +20,30 @@
     if (window.addEventListener) {
       var keys = [],
         konami = "38,38,40,40,37,39,37,39,66,65";
-      window.addEventListener("keydown", function(e){
+
+      var dialog = null;
+      function openDialog() {
+        if (!dialog) {
+          dialog = document.createElement("dialog");
+          dialog.innerHTML =
+            '<h2>Choose a game</h2>' +
+            '<ul>' +
+            '<li><a href="LINK_1">Game One</a></li>' +
+            '<li><a href="LINK_2">Game Two</a></li>' +
+            '<li><a href="LINK_3">Game Three</a></li>' +
+            '</ul>' +
+            '<form method="dialog"><button>Close</button></form>';
+          document.body.appendChild(dialog);
+        }
+        if (!dialog.open) dialog.showModal();
+      }
+
+      window.addEventListener("keydown", function (e) {
         keys.push(e.keyCode);
         if (keys.toString().indexOf(konami) >= 0) {
-          showGames();
+          openDialog();
           keys = [];
         };
       }, true);
     };
-
-    // Hidden game list: built only after the code above matches. Edit this array to change the list.
-    var GAMES = [
-      { title: "Beatwake", note: "Rhythm platformer. Jump to the beat.", url: "/eea07153-c8c1-46d8-95c7-d13cc86e93d1" },
-      { title: "Rocket League", note: "3D arena soccer with cars and bots.", url: {{ rl_page.url | default: "/pages/rocket-league.html" | relative_url | jsonify }} },
-      { title: "Forza Horizon 10", note: "Free-roam drive through a city.", url: {{ fd_page.url | default: "/pages/free-drive.html" | relative_url | jsonify }} }
-    ];
-    function showGames() {
-      var ov = document.getElementById("game-list-overlay");
-      if (!ov) {
-        var st = document.createElement("style");
-        st.textContent = "#game-list-overlay[hidden]{display:none!important}" +
-          "#game-list-overlay{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;background:rgba(7,10,28,.85);font-family:system-ui,'Segoe UI',sans-serif}" +
-          "#game-list-overlay .gl-card{width:min(480px,100%);max-height:100%;overflow-y:auto;box-sizing:border-box;padding:24px;background:#12183a;color:#eaf6ff;border:2px solid #37f3c8;border-radius:6px 20px 6px 20px}" +
-          "#game-list-overlay h2{margin:0 0 14px;font-size:clamp(22px,5vw,30px)}" +
-          "#game-list-overlay ul{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px}" +
-          "#game-list-overlay li{padding:12px 14px;background:#1b2358;border-radius:8px}" +
-          "#game-list-overlay a{display:block;color:#37f3c8;font-size:clamp(18px,4.5vw,24px);font-weight:700;text-decoration:underline}" +
-          "#game-list-overlay a:hover{color:#fff}" +
-          "#game-list-overlay a:focus-visible,#game-list-overlay button:focus-visible{outline:3px solid #fff;outline-offset:3px}" +
-          "#game-list-overlay span{display:block;margin-top:4px;font-size:15px;opacity:.85}" +
-          "#game-list-overlay button{padding:10px 22px;font:inherit;font-weight:700;color:#eaf6ff;background:#151c46;border:2px solid #ff4fa3;border-radius:6px;cursor:pointer}";
-        document.head.appendChild(st);
-        ov = document.createElement("div");
-        ov.id = "game-list-overlay";
-        ov.setAttribute("role", "dialog");
-        ov.setAttribute("aria-modal", "true");
-        ov.setAttribute("aria-labelledby", "game-list-title");
-        var card = document.createElement("div"); card.className = "gl-card";
-        var h = document.createElement("h2"); h.id = "game-list-title"; h.textContent = "Secret games unlocked";
-        var ul = document.createElement("ul");
-        GAMES.forEach(function (g) {
-          var li = document.createElement("li"), a = document.createElement("a"), n = document.createElement("span");
-          a.href = g.url; a.textContent = g.title; n.textContent = g.note;
-          li.appendChild(a); li.appendChild(n); ul.appendChild(li);
-        });
-        var close = document.createElement("button"); close.type = "button"; close.textContent = "Close";
-        card.appendChild(h); card.appendChild(ul); card.appendChild(close); ov.appendChild(card);
-        document.body.appendChild(ov);
-        var back = null;
-        var hide = function () { ov.hidden = true; if (back && back.focus) back.focus(); };
-        close.addEventListener("click", hide);
-        ov.addEventListener("click", function (e) { if (e.target === ov) hide(); });
-        ov.addEventListener("keydown", function (e) {
-          if (e.key === "Escape") { hide(); return; }
-          if (e.key !== "Tab") return;
-          var f = ov.querySelectorAll("a,button"), first = f[0], last = f[f.length - 1];
-          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-        });
-        ov._remember = function () { back = document.activeElement; };
-      }
-      ov._remember();
-      ov.hidden = false;
-      ov.querySelector("a").focus();
-    }
-</script>
+  </script>
