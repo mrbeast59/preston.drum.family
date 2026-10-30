@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: game
 title: "Forza Horizon 10"
 ---
 

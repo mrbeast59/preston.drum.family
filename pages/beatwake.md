@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: game
 short_title: " "
 title: ""
 ---
