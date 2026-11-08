@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: game
 short_title: " "
 title: ""
 permalink: /math-work/62562718-1c0d-45e5-8fca-cd3b008884ca
@@ -7,7 +7,8 @@ permalink: /math-work/62562718-1c0d-45e5-8fca-cd3b008884ca
 
 <style>
     body { margin: 0; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Arial', sans-serif; }
-    #game-container { position: relative; width: 1200px; height: 600px; overflow: hidden; border: 4px solid #333; }
+    #game-container { position: relative; width: 1200px; height: 600px; overflow: hidden; border: 4px solid #333; flex: none; transform-origin: center center; touch-action: none; }
+    #slide-title { color: #fff; }
     canvas { cursor: pointer; display: block; }
 
     #live-score {
@@ -150,7 +151,11 @@ const levels = [
     { name: "THE VOID", color: "#111", bgType: "grid", face: "#f0f", infinite: true }
 ];
 
-let highScores = JSON.parse(localStorage.getItem('gdHighScores')) || [0,0,0,0];
+let highScores = [0,0,0,0];
+try {
+    const savedScores = JSON.parse(localStorage.getItem('gdHighScores'));
+    if (Array.isArray(savedScores)) highScores = highScores.map((v, i) => Number(savedScores[i]) || 0);
+} catch (e) {}
 
 function updateMenuUI() {
     const lvl = levels[currentSlideIdx];
@@ -174,7 +179,7 @@ function updateMenuUI() {
 function saveHighScore() {
     if (score > highScores[currentSlideIdx]) {
         highScores[currentSlideIdx] = score;
-        localStorage.setItem('gdHighScores', JSON.stringify(highScores));
+        try { localStorage.setItem('gdHighScores', JSON.stringify(highScores)); } catch (e) {}
     }
 }
 
@@ -381,10 +386,19 @@ function draw() {
 }
 
 function gameLoop(t) { let dt = t - lastTime; lastTime = t; update(Math.min(dt || 16, 32)); draw(); requestAnimationFrame(gameLoop); }
-window.addEventListener('keydown', e => { if(e.code==='Space' || e.code==='ArrowUp') isHolding = true; });
-window.addEventListener('keyup', () => isHolding = false);
-c.addEventListener('mousedown', () => { if(state === 'PLAYING') isHolding = true; });
-window.addEventListener('mouseup', () => isHolding = false);
+window.addEventListener('keydown', e => { if(e.code==='Space' || e.code==='ArrowUp') { e.preventDefault(); isHolding = true; } });
+window.addEventListener('keyup', e => { if(e.code==='Space' || e.code==='ArrowUp') isHolding = false; });
+const pressStart = e => { if(state === 'PLAYING') { e.preventDefault(); isHolding = true; } };
+const pressEnd = () => { isHolding = false; };
+c.addEventListener('pointerdown', pressStart);
+window.addEventListener('pointerup', pressEnd);
+window.addEventListener('pointercancel', pressEnd);
+function fitGame() {
+    const scale = Math.min(window.innerWidth / 1200, window.innerHeight / 600);
+    document.getElementById('game-container').style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', fitGame);
+fitGame();
 requestAnimationFrame(gameLoop);
 updateMenuUI();
 </script>

@@ -386,6 +386,8 @@ title: "3D Rocket League - Multi-Mode"
                 });
                 updateBoostUI();
                 carVel *= 0.97; car.rotation.y = carRot; car.translateZ(carVel);
+                car.position.x = Math.max(-arenaW/2 + 4, Math.min(arenaW/2 - 4, car.position.x));
+                car.position.z = Math.max(-arenaD/2 + 4, Math.min(arenaD/2 - 4, car.position.z));
 
                 if (!isGrounded) {
                     carYVel -= 0.02; car.position.y += carYVel;

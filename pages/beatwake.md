@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: game
 short_title: " "
 title: ""
 permalink: /eea07153-c8c1-46d8-95c7-d13cc86e93d1
@@ -12,7 +12,7 @@ permalink: /eea07153-c8c1-46d8-95c7-d13cc86e93d1
   .ov{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(7,10,28,.86)}
   .ov[hidden],#hud[hidden]{display:none}
   .logo{margin:0;font-size:104px;font-weight:900;font-style:italic;letter-spacing:.04em;background:linear-gradient(95deg,#37f3c8 20%,#ff4fa3 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
-  h2{margin:0 0 6px;font-size:42px}
+  h2{margin:0 0 6px;font-size:42px;color:#eaf6ff}
   .sub{margin:0 0 10px;opacity:.85;font-size:17px}
   .btn{min-width:230px;padding:13px 28px;font:inherit;font-weight:700;font-size:19px;color:#eaf6ff;background:#151c46;border:2px solid #37f3c8;border-radius:4px 14px 4px 14px;cursor:pointer;box-shadow:0 4px 0 #0c8a72}
   .btn.alt{border-color:#ff4fa3;box-shadow:0 4px 0 #962b63}
@@ -373,7 +373,7 @@ function fit(){const s=Math.min(innerWidth/W,innerHeight/H),q=Math.min(s*(device
  $('#stage').style.transform=`scale(${s})`;c.width=Math.round(W*q);c.height=Math.round(H*q);ctx.setTransform(q,0,0,q,0,0)}
 addEventListener('resize',fit);
 window.__bw={LV,PH,build,newState,step,DT,PS,T};
-if(!ctx)toast('Canvas is not supported in this browser.');
-fit();syncUI();show('home');requestAnimationFrame(frame);
+if(!ctx){toast('Canvas is not supported in this browser.')}
+else{fit();syncUI();show('home');requestAnimationFrame(frame)}
 })();
 </script>

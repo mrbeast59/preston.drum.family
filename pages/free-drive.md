@@ -192,8 +192,8 @@ title: "Forza Horizon 10"
   const mapSizeX = gridX * blockW;
   const mapSizeZ = gridZ * blockL;
 
-  for(let i = -gridX; i <= gridX; i++) {
-    const laneX = i * blockW;
+  for(let i = -gridX; i < gridX; i++) {
+    const laneX = i * blockW + blockW / 2;
     // Z-Axis Traffic (Long Avenues) - More Cars here
     for(let k=0; k<2; k++) { // 2 Lanes
         const offset = (k==0? 10 : -10);
@@ -203,8 +203,8 @@ title: "Forza Horizon 10"
     }
   }
 
-  for(let j = -gridZ; j <= gridZ; j++) {
-      const laneZ = j * blockL;
+  for(let j = -gridZ; j < gridZ; j++) {
+      const laneZ = j * blockL + blockL / 2;
       // X-Axis Traffic (Cross streets)
       for(let k=0; k<2; k++) {
         const offset = (k==0? 10 : -10);
@@ -219,6 +219,7 @@ title: "Forza Horizon 10"
   const cBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.1, 5), new THREE.MeshStandardMaterial({ color: 0xff0055 }));
   cBody.position.y = 0.6;
   car.add(cBody);
+  car.position.set(blockW / 2, 0, 0);
   scene.add(car);
 
   // --- 7. GAME LOOP ---
@@ -290,8 +291,8 @@ title: "Forza Horizon 10"
         const bound = b.bounds;
         if (nextPos.x > bound.minX && nextPos.x < bound.maxX &&
             nextPos.z > bound.minZ && nextPos.z < bound.maxZ) {
-            if (Math.abs(speed) > 0.5) hit = true;
-            else car.position.y = 0.8;
+            hit = true;
+            break;
         }
     }
     // Collision: Cars
