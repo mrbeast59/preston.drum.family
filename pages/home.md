@@ -5,6 +5,14 @@ title: Home
 permalink: /
 ---
 
+## Games
+
+### Nippon Open Road
+
+[Play Nippon Open Road →](/japan-drive/)
+
+An original open-world drive through the coast, neon city, rice plains and alpine passes of Kai Prefecture.
+
 ## Rubik's Cube
 
 ### Algorithms
