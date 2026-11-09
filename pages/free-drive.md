@@ -534,27 +534,29 @@ title: "Forza Horizon 10"
     },
     gt3rs: {
       body: [
-        { z: -2.30, w: .72, b: .48, t: .90 },
-        { z: -2.08, w: 1.08, b: .34, t: 1.04 },
-        { z: -1.50, w: 1.06, b: .32, t: 1.06 },
-        { z: -.50, w: 1.02, b: .32, t: 1.02 },
-        { z: .50, w: .96, b: .32, t: .96 },
-        { z: 1.35, w: .98, b: .34, t: .90 },
-        { z: 1.95, w: .86, b: .38, t: .80 },
-        { z: 2.28, w: .62, b: .46, t: .80 }
+        { z: -2.30, w: .70, b: .46, t: .86 },
+        { z: -2.10, w: 1.04, b: .34, t: .96 },
+        { z: -1.70, w: 1.09, b: .31, t: .99 },
+        { z: -1.25, w: 1.10, b: .30, t: .98 },
+        { z: -.55, w: 1.01, b: .30, t: .95 },
+        { z: .35, w: .96, b: .30, t: .92 },
+        { z: 1.15, w: 1.02, b: .31, t: .92 },
+        { z: 1.55, w: 1.03, b: .33, t: .90 },
+        { z: 2.05, w: .88, b: .38, t: .87 },
+        { z: 2.30, w: .60, b: .44, t: .81 }
       ],
       cabin: [
-        { z: -1.62, w: .22, b: .98, t: 1.04 },
-        { z: -1.35, w: .55, b: .99, t: 1.10 },
-        { z: -.90, w: .70, b: .99, t: 1.30 },
-        { z: -.40, w: .76, b: .99, t: 1.47 },
-        { z: .05, w: .74, b: .99, t: 1.52 },
-        { z: .50, w: .63, b: .99, t: 1.40 },
-        { z: .82, w: .44, b: .99, t: 1.18 },
-        { z: 1.00, w: .20, b: 1.0, t: 1.04 }
+        { z: -1.62, w: .22, b: .94, t: 1.00 },
+        { z: -1.38, w: .58, b: .94, t: 1.06 },
+        { z: -1.00, w: .72, b: .94, t: 1.22 },
+        { z: -.55, w: .78, b: .94, t: 1.34 },
+        { z: -.05, w: .76, b: .94, t: 1.37 },
+        { z: .38, w: .66, b: .94, t: 1.26 },
+        { z: .72, w: .48, b: .94, t: 1.08 },
+        { z: .92, w: .22, b: .95, t: .97 }
       ],
-      roof: { sx: 1.18, sy: .05, sz: 1.30, y: 1.55, z: -.40 },
-      light: { x: .60, y: .78, z: 2.21, sx: .18, sy: .14, sz: .09 }
+      roof: { sx: 1.14, sy: .045, sz: 1.22, y: 1.40, z: -.58 },
+      light: { x: .62, y: .76, z: 2.22, sx: .15, sy: .11, sz: .06 }
     }
   };
 
@@ -981,6 +983,28 @@ title: "Forza Horizon 10"
 
   const tireMat = new THREE.MeshStandardMaterial({ color: 0x090a0c, roughness: .92 });
   const rimMat = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: .95, roughness: .22 });
+  const gt3RimMat = new THREE.MeshStandardMaterial({ color: 0x15181c, metalness: .9, roughness: .3 });
+  const carbonMat = new THREE.MeshStandardMaterial({ color: 0x15181c, metalness: .55, roughness: .36 });
+  const gt3SpokeMat = new THREE.MeshStandardMaterial({ color: 0x4a5158, metalness: .85, roughness: .3 });
+  const gt3HeadMat = new THREE.MeshStandardMaterial({ color: 0x0b0d0f, emissive: 0xffe6b8, emissiveIntensity: .08, metalness: .3, roughness: .15 });
+  const caliperMat = new THREE.MeshStandardMaterial({ color: 0xf0b600, metalness: .35, roughness: .4, emissive: 0x4a3200, emissiveIntensity: .35 });
+  const gt3DecalMat = new THREE.MeshBasicMaterial({
+    map: makeTexture(512, 128, (g, w, h) => {
+      g.fillStyle = '#0c1014';
+      g.fillRect(0, 0, w, h);
+      g.fillStyle = '#f4f5f1';
+      g.font = '700 70px Arial, sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText('GT3 RS', w / 2, h / 2 + 3);
+      g.fillStyle = '#9ba3a8';
+      g.fillRect(30, h - 18, w - 60, 4);
+    }),
+    transparent: true,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2
+  });
   const glassMat = new THREE.MeshStandardMaterial({ color: 0x0b1621, metalness: .8, roughness: .14 });
   const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfff1c4, emissiveIntensity: 2.1, roughness: .2 });
   const tailMat = new THREE.MeshStandardMaterial({ color: 0x7a0b16, emissive: 0xff1a2e, emissiveIntensity: .9, roughness: .3 });
@@ -1040,7 +1064,7 @@ title: "Forza Horizon 10"
     const roundHeadlights = [];
     if (hero) {
       for (const x of [-.6, .6]) {
-        const light = new THREE.Mesh(sphereGeo, headMat);
+        const light = new THREE.Mesh(sphereGeo, gt3HeadMat);
         light.scale.set(.18, .14, .09);
         light.position.set(x, .78, 2.21);
         light.visible = false;
@@ -1071,7 +1095,9 @@ title: "Forza Horizon 10"
 
     let spoiler = null;
     let gt3Details = null;
+    let thirdBrake = null;
     const wingEndplates = [];
+    const mirrors = [];
     if (hero) {
       plate = new THREE.Mesh(roundedGeo, plateMat);
       plate.scale.set(.54, .15, .035);
@@ -1104,19 +1130,105 @@ title: "Forza Horizon 10"
 
       gt3Details = new THREE.Group();
       gt3Details.visible = false;
+
       const rearVent = new THREE.Mesh(roundedGeo, signalMat);
-      rearVent.scale.set(1.15, .035, .55);
-      rearVent.position.set(0, 1.055, -1.55);
+      rearVent.scale.set(.92, .04, .52);
+      rearVent.position.set(0, .982, -1.52);
       gt3Details.add(rearVent);
-      for (const x of [-.84, .84]) {
-        const sideVent = new THREE.Mesh(roundedGeo, signalMat);
-        sideVent.scale.set(.055, .18, .5);
-        sideVent.position.set(x, .82, -1.18);
-        gt3Details.add(sideVent);
+
+      for (const side of [-1, 1]) {
+        for (let i = 0; i < 3; i++) {
+          const sideVent = new THREE.Mesh(roundedGeo, signalMat);
+          sideVent.scale.set(.06, .16, .075);
+          sideVent.position.set(side * 1.1, .66, -1.02 - i * .12);
+          gt3Details.add(sideVent);
+        }
+        for (let i = 0; i < 3; i++) {
+          const louvre = new THREE.Mesh(roundedGeo, signalMat);
+          louvre.scale.set(.045, .16, .08);
+          louvre.position.set(side * .995, .66, 1.02 + i * .11);
+          gt3Details.add(louvre);
+        }
+
+        const skirt = new THREE.Mesh(roundedGeo, signalMat);
+        skirt.scale.set(.1, .13, 1.66);
+        skirt.position.set(side * 1.005, .33, .02);
+        gt3Details.add(skirt);
+
+        const canard = new THREE.Mesh(roundedGeo, carbonMat);
+        canard.scale.set(.2, .025, .3);
+        canard.position.set(side * .93, .46, 2.01);
+        canard.rotation.z = side * -.12;
+        gt3Details.add(canard);
+
+        const surround = new THREE.Mesh(roundedGeo, signalMat);
+        surround.scale.set(.28, .21, .06);
+        surround.position.set(side * .62, .76, 2.17);
+        gt3Details.add(surround);
+
+        const drl = new THREE.Mesh(new THREE.TorusGeometry(.09, .012, 4, 14), headMat);
+        drl.position.set(side * .62, .76, 2.258);
+        gt3Details.add(drl);
+
+        const intake = new THREE.Mesh(roundedGeo, signalMat);
+        intake.scale.set(.34, .2, .1);
+        intake.position.set(side * .45, .52, 2.27);
+        gt3Details.add(intake);
+
+        const decal = new THREE.Mesh(new THREE.PlaneGeometry(1.02, .26), gt3DecalMat);
+        decal.position.set(side * 1.006, .7, .32);
+        decal.rotation.y = side * Math.PI / 2;
+        gt3Details.add(decal);
       }
+
+      const hood = new THREE.Mesh(roundedGeo, carbonMat);
+      hood.scale.set(.74, .03, .58);
+      hood.position.set(0, .9, 1.63);
+      hood.rotation.x = .1;
+      gt3Details.add(hood);
+
+      const archGeo = new THREE.TorusGeometry(.46, .05, 6, 18, Math.PI);
+      const wellGeo = new THREE.CircleGeometry(.47, 20, 0, Math.PI);
+      for (const side of [-1, 1]) {
+        for (const wz of [1.37, -1.37]) {
+          const arch = new THREE.Mesh(archGeo, signalMat);
+          arch.position.set(side * (wz > 0 ? 1.035 : 1.105), .37, wz);
+          arch.rotation.y = side * Math.PI / 2;
+          gt3Details.add(arch);
+          const well = new THREE.Mesh(wellGeo, signalMat);
+          well.position.set(side * (wz > 0 ? 1.03 : 1.1), .37, wz);
+          well.rotation.y = side * Math.PI / 2;
+          gt3Details.add(well);
+        }
+      }
+
+      for (const x of [-.5, 0, .5]) {
+        const fin = new THREE.Mesh(roundedGeo, signalMat);
+        fin.scale.set(.035, .16, .46);
+        fin.position.set(x, .21, -2.08);
+        gt3Details.add(fin);
+      }
+
+      const lightBar = new THREE.Mesh(roundedGeo, brakeMat);
+      lightBar.scale.set(.96, .035, .04);
+      lightBar.position.set(0, .8, -2.235);
+      gt3Details.add(lightBar);
+
+      for (const side of [-1, 1]) {
+        const armCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(side * .55, .93, -1.42),
+          new THREE.Vector3(side * .55, 1.2, -1.56),
+          new THREE.Vector3(side * .55, 1.44, -1.98),
+          new THREE.Vector3(side * .55, 1.48, -2.13)
+        ]);
+        const arm = new THREE.Mesh(new THREE.TubeGeometry(armCurve, 12, .03, 6, false), carbonMat);
+        arm.castShadow = true;
+        gt3Details.add(arm);
+      }
+
       body.add(gt3Details);
 
-      const thirdBrake = new THREE.Mesh(roundedGeo, brakeMat);
+      thirdBrake = new THREE.Mesh(roundedGeo, brakeMat);
       thirdBrake.scale.set(.58, .04, .05);
       thirdBrake.position.set(0, 1.252, -2.05);
       body.add(thirdBrake);
@@ -1139,13 +1251,24 @@ title: "Forza Horizon 10"
       for (const x of [-1.02, 1.02]) {
         const mirror = new THREE.Mesh(roundedGeo, bodyMat);
         mirror.scale.set(.24, .09, .16);
-        mirror.position.set(x, 1.08, .55);
+        mirror.position.set(x, .99, .55);
         body.add(mirror);
+        mirrors.push(mirror);
+        const mirrorArm = new THREE.Mesh(roundedGeo, bodyMat);
+        mirrorArm.scale.set(.16, .04, .05);
+        mirrorArm.position.set(x - Math.sign(x) * .05, .95, .55);
+        body.add(mirrorArm);
+        mirrors.push(mirrorArm);
       }
     }
 
     const wheels = [];
     const frontPivots = [];
+    const wheelPivots = [];
+    const rims = [];
+    const calipers = [];
+    const spokes = [];
+    const rimLips = [];
     for (const [x, z] of [[-.99, 1.37], [.99, 1.37], [-.99, -1.37], [.99, -1.37]]) {
       const pivot = new THREE.Group();
       pivot.position.set(x, .37, z);
@@ -1155,13 +1278,36 @@ title: "Forza Horizon 10"
       if (hero) {
         const rim = new THREE.Mesh(rimGeo, rimMat);
         pivot.add(rim);
+        rims.push(rim);
+        const caliper = new THREE.Mesh(roundedGeo, caliperMat);
+        caliper.scale.set(.04, .085, .12);
+        caliper.position.set(Math.sign(x) * .164, .18, 0);
+        caliper.visible = false;
+        pivot.add(caliper);
+        calipers.push(caliper);
+        for (let s = 0; s < 5; s++) {
+          const spoke = new THREE.Mesh(boxGeo, gt3SpokeMat);
+          spoke.scale.set(.016, .3, .038);
+          spoke.position.set(Math.sign(x) * .157, 0, 0);
+          spoke.rotation.x = s * Math.PI / 5;
+          spoke.visible = false;
+          pivot.add(spoke);
+          spokes.push(spoke);
+        }
+        const lip = new THREE.Mesh(new THREE.TorusGeometry(.335, .012, 4, 20), rimMat);
+        lip.position.set(Math.sign(x) * .151, 0, 0);
+        lip.rotation.y = Math.PI / 2;
+        lip.visible = false;
+        pivot.add(lip);
+        rimLips.push(lip);
       }
       root.add(pivot);
       wheels.push(tire);
+      wheelPivots.push(pivot);
       if (z > 0) frontPivots.push(pivot);
     }
 
-    root.userData = { body, lower, cabin, roof, wheels, frontPivots, brakeMat, rearLights, headLights, roundHeadlights, gt3Details, grille, plate, splitter, diffuser, exhausts, bodyMat, spoiler, wingEndplates };
+    root.userData = { body, lower, cabin, roof, wheels, frontPivots, wheelPivots, rims, calipers, spokes, rimLips, mirrors, brakeMat, rearLights, headLights, roundHeadlights, gt3Details, grille, plate, splitter, diffuser, exhausts, bodyMat, spoiler, wingEndplates, thirdBrake };
     return root;
   }
 
@@ -1183,7 +1329,7 @@ title: "Forza Horizon 10"
     { id: 'midnight', name: 'Midnight Drift', tag: 'Loose rear, carries speed', color: 0x2f6bff, accel: 19, top: 71, grip: 10.2, driftGrip: .82, handbrakeDrag: 2, driftDrag: .08, steer: .74, yaw: 15, driftYaw: 21, speed: 3.7, gripBar: 3.1, driftBar: 5 },
     { id: 'solar', name: 'Solar Apex', tag: 'Top speed monster', color: 0xffb21a, accel: 22.4, top: 88, grip: 12.1, driftGrip: 1.45, handbrakeDrag: 2.8, driftDrag: .18, steer: .65, yaw: 13.2, driftYaw: 17, speed: 5, gripBar: 4, driftBar: 2.8 },
     { id: 'mint', name: 'Mint Machine', tag: 'Grip for days', color: 0x2fe0a4, accel: 18.2, top: 68, grip: 13.4, driftGrip: 1.55, handbrakeDrag: 3, driftDrag: .22, steer: .76, yaw: 13.6, driftYaw: 16.5, speed: 3.2, gripBar: 5, driftBar: 3.2 },
-    { id: 'gt3rs', name: 'Porsche 911 GT3 RS', tag: 'Track-bred flat-six', color: 0x8ed126, accel: 23.5, top: 90, grip: 14.2, driftGrip: 1.15, handbrakeDrag: 2.2, driftDrag: .1, steer: .75, yaw: 15.5, driftYaw: 20, speed: 5.5, gripBar: 5, driftBar: 4.1 }
+    { id: 'gt3rs', name: 'Porsche 911 GT3 RS', tag: 'Track-bred flat-six', color: 0xd6d7d2, accel: 23.5, top: 90, grip: 14.2, driftGrip: 1.15, handbrakeDrag: 2.2, driftDrag: .1, steer: .75, yaw: 15.5, driftYaw: 20, speed: 5.5, gripBar: 5, driftBar: 4.1 }
   ];
   const CAR_KEY = 'forza.car.v1';
   let selectedCarIndex = 0;
@@ -1198,15 +1344,21 @@ title: "Forza Horizon 10"
     const def = shape.def;
     const first = def.body[0];
     const last = def.body[def.body.length - 1];
+    const gt3 = car.id === 'gt3rs';
     hero.userData.lower.geometry = shape.body;
     hero.userData.cabin.geometry = shape.cabin;
     hero.userData.roof.geometry = shape.roof;
-    hero.userData.grille.position.set(0, last.b + (last.t - last.b) * .35, last.z - .01);
-    hero.userData.grille.scale.set(last.w * 1.12, .13, .06);
+    hero.userData.grille.position.set(0, gt3 ? .5 : last.b + (last.t - last.b) * .35, last.z - .01);
+    hero.userData.grille.scale.set(gt3 ? 1.02 : last.w * 1.12, gt3 ? .18 : .13, .06);
     hero.userData.plate.position.z = first.z - .01;
-    hero.userData.splitter.position.z = last.z + .02;
-    hero.userData.diffuser.position.z = first.z + .08;
-    for (const pipe of hero.userData.exhausts) pipe.position.z = first.z - .08;
+    hero.userData.splitter.position.set(0, gt3 ? .4 : .3, last.z + .02);
+    hero.userData.splitter.scale.set(gt3 ? 1.5 : 1.94, .06, gt3 ? .3 : .46);
+    hero.userData.diffuser.position.set(0, gt3 ? .38 : .3, first.z + .08);
+    hero.userData.diffuser.scale.set(gt3 ? 1.45 : 1.72, .1, gt3 ? .32 : .38);
+    hero.userData.exhausts.forEach((pipe, index) => {
+      pipe.position.x = gt3 ? (index === 0 ? -.2 : .2) : (index === 0 ? -.55 : .55);
+      pipe.position.z = first.z - .08;
+    });
     const rearX = Math.min(.52, first.w * .74);
     hero.userData.rearLights.forEach((mesh, index) => {
       mesh.position.set((index === 0 ? -1 : 1) * rearX, .8, first.z + .07);
@@ -1215,20 +1367,39 @@ title: "Forza Horizon 10"
     hero.userData.headLights.forEach((mesh, index) => {
       mesh.position.set((index === 0 ? -1 : 1) * light.x, light.y, light.z);
       mesh.scale.set(light.sx, light.sy, light.sz);
-      mesh.visible = car.id !== 'gt3rs';
+      mesh.visible = !gt3;
     });
     hero.userData.roundHeadlights.forEach((mesh, index) => {
       mesh.position.set((index === 0 ? -1 : 1) * light.x, light.y, light.z);
-      mesh.visible = car.id === 'gt3rs';
+      mesh.visible = gt3;
     });
-    if (hero.userData.gt3Details) hero.userData.gt3Details.visible = car.id === 'gt3rs';
+    if (hero.userData.gt3Details) hero.userData.gt3Details.visible = gt3;
     hero.userData.bodyMat.color.setHex(car.color);
-    const gt3 = car.id === 'gt3rs';
+    hero.userData.roof.material = gt3 ? carbonMat : hero.userData.bodyMat;
+    hero.userData.rims.forEach((rim) => { rim.material = gt3 ? gt3RimMat : rimMat; });
+    hero.userData.calipers.forEach((caliper) => { caliper.visible = gt3; });
+    hero.userData.spokes.forEach((spoke) => { spoke.visible = gt3; });
+    hero.userData.rimLips.forEach((lip) => { lip.visible = gt3; });
+    hero.userData.mirrors.forEach((mirror) => { mirror.material = gt3 ? carbonMat : hero.userData.bodyMat; });
+    hero.userData.wheelPivots.forEach((pivot) => {
+      pivot.position.x = Math.sign(pivot.position.x) * (gt3 ? 1.01 : .99);
+    });
+    if (hero.userData.thirdBrake) hero.userData.thirdBrake.visible = !gt3;
+
     if (hero.userData.spoiler) {
-      hero.userData.spoiler.scale.set(gt3 ? 2.02 : 1.72, gt3 ? .055 : .06, gt3 ? .62 : .48);
-      hero.userData.spoiler.position.y = gt3 ? 1.27 : 1.22;
+      const wingY = gt3 ? 1.48 : 1.22;
+      const wingZ = gt3 ? -2.14 : -2.03;
+      hero.userData.spoiler.scale.set(gt3 ? 2.1 : 1.72, gt3 ? .07 : .06, gt3 ? .64 : .48);
+      hero.userData.spoiler.position.set(0, wingY, wingZ);
+      hero.userData.spoiler.material = gt3 ? carbonMat : hero.userData.bodyMat;
+      for (const endplate of hero.userData.wingEndplates) {
+        const sx = Math.sign(endplate.position.x) || 1;
+        endplate.position.set(sx * (gt3 ? 1.03 : 1.0), wingY + .02, wingZ);
+        endplate.scale.set(gt3 ? .06 : .055, gt3 ? .32 : .2, gt3 ? .6 : .48);
+        endplate.material = gt3 ? carbonMat : hero.userData.bodyMat;
+        endplate.visible = gt3;
+      }
     }
-    for (const endplate of hero.userData.wingEndplates) endplate.visible = gt3;
   }
   applyCarLook(activeCar);
 
@@ -1315,52 +1486,267 @@ title: "Forza Horizon 10"
   // --- Sky decks, ramps and stunt surfaces ----------------------------------
   const stuntSurfaces = [];
   const stuntDecks = [];
-  const stuntMat = new THREE.MeshStandardMaterial({ color: 0x39434c, roughness: .88, metalness: .16 });
-  const stuntTopMat = new THREE.MeshStandardMaterial({ color: 0x20272e, roughness: .93, metalness: .08 });
+  const stuntMat = new THREE.MeshStandardMaterial({ color: 0x39434c, roughness: .86, metalness: .18 });
+  const stuntTopMat = new THREE.MeshStandardMaterial({ color: 0x20272e, roughness: .95, metalness: .05 });
+  const stuntConcreteMat = new THREE.MeshStandardMaterial({ color: 0x9aa1a7, roughness: .92, metalness: .02 });
+  const stuntRailMat = new THREE.MeshStandardMaterial({ color: 0xb9c3cb, roughness: .34, metalness: .72 });
+  const stuntPaintMat = new THREE.MeshBasicMaterial({ color: 0xd9e4ea });
   const stuntGlowMat = neonMats[1];
   const stuntWarmGlowMat = neonMats[2];
+  const pierGeo = new THREE.CylinderGeometry(1.5, 2.2, 1, 14);
+  const upAxis = new THREE.Vector3(0, 1, 0);
 
-  function addStuntRamp(x, z, w, length, y0, y1) {
-    const angle = Math.atan2(y1 - y0, length);
-    const ramp = new THREE.Mesh(boxGeo, stuntMat);
-    ramp.scale.set(w, .34, Math.hypot(length, y1 - y0));
-    ramp.position.set(x, (y0 + y1) / 2 - .1, z + length / 2);
-    ramp.rotation.x = -angle;
-    ramp.castShadow = false;
+  function roundedRectShape(w, d, r) {
+    const x0 = -w / 2;
+    const z0 = -d / 2;
+    const shape = new THREE.Shape();
+    shape.moveTo(x0 + r, z0);
+    shape.lineTo(x0 + w - r, z0);
+    shape.quadraticCurveTo(x0 + w, z0, x0 + w, z0 + r);
+    shape.lineTo(x0 + w, z0 + d - r);
+    shape.quadraticCurveTo(x0 + w, z0 + d, x0 + w - r, z0 + d);
+    shape.lineTo(x0 + r, z0 + d);
+    shape.quadraticCurveTo(x0, z0 + d, x0, z0 + d - r);
+    shape.lineTo(x0, z0 + r);
+    shape.quadraticCurveTo(x0, z0, x0 + r, z0);
+    return shape;
+  }
+
+  function deckSlabGeometry(w, d, thickness, radius) {
+    const bevel = .22;
+    const geo = new THREE.ExtrudeGeometry(roundedRectShape(w, d, radius), {
+      depth: thickness,
+      bevelEnabled: true,
+      bevelSize: bevel,
+      bevelThickness: bevel,
+      bevelSegments: 1,
+      curveSegments: 3,
+      steps: 1
+    });
+    geo.rotateX(Math.PI / 2);
+    geo.translate(0, -bevel, 0);
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  function rampWedgeGeometry(length, startRise, endRise, width) {
+    const bevel = .14;
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(length, 0);
+    shape.lineTo(length, endRise);
+    shape.lineTo(0, startRise);
+    shape.closePath();
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: width,
+      bevelEnabled: true,
+      bevelSize: bevel,
+      bevelThickness: bevel,
+      bevelSegments: 1,
+      steps: 1
+    });
+    geo.translate(0, 0, -width / 2);
+    geo.rotateY(-Math.PI / 2);
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  function strutBetween(ax, ay, az, bx, by, bz, radius) {
+    const a = new THREE.Vector3(ax, ay, az);
+    const b = new THREE.Vector3(bx, by, bz);
+    const dir = b.clone().sub(a);
+    const len = dir.length();
+    if (len < .001) return;
+    const mesh = new THREE.Mesh(cylinderGeo, stuntRailMat);
+    mesh.scale.set(radius, len, radius);
+    mesh.position.copy(a).addScaledVector(dir, .5);
+    mesh.quaternion.setFromUnitVectors(upAxis, dir.normalize());
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+  }
+
+  function makeDeckSign(label) {
+    const tex = makeTexture(640, 128, (g, w, h) => {
+      g.fillStyle = '#0c141b';
+      g.fillRect(0, 0, w, h);
+      g.strokeStyle = '#52e5ff';
+      g.lineWidth = 5;
+      g.strokeRect(4, 4, w - 8, h - 8);
+      g.fillStyle = '#eaf8ff';
+      g.font = '700 58px Arial, sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText(label, w / 2, h / 2 + 2);
+      g.fillStyle = '#ffc44d';
+      g.fillRect(18, h - 18, w - 36, 5);
+    });
+    return new THREE.MeshBasicMaterial({ map: tex });
+  }
+
+  function addRamp(x, z, w, length, baseY, y0, y1, accentMat) {
+    const rise = y1 - y0;
+    const angle = Math.atan2(rise, length);
+    const run = Math.hypot(length, rise);
+    const ramp = new THREE.Mesh(rampWedgeGeometry(length, y0 - baseY, y1 - baseY, w), stuntMat);
+    ramp.position.set(x, baseY - .14, z);
     ramp.receiveShadow = true;
     scene.add(ramp);
-    block(x, y0 + .08, z + .35, w, .12, .7, stuntGlowMat, false, false);
-    block(x, y1 + .1, z + length - .3, w - 2, .12, .55, stuntWarmGlowMat, false, false);
+
+    for (const side of [-1, 1]) {
+      const bx = x + side * (w / 2 - .28);
+      const wall = new THREE.Mesh(boxGeo, stuntConcreteMat);
+      wall.scale.set(.5, .8, run);
+      wall.position.set(bx, (y0 + y1) / 2 + .34, z + length / 2);
+      wall.rotation.x = -angle;
+      wall.receiveShadow = true;
+      scene.add(wall);
+
+      const handrail = new THREE.Mesh(boxGeo, stuntRailMat);
+      handrail.scale.set(.62, .12, run);
+      handrail.position.set(bx, (y0 + y1) / 2 + .78, z + length / 2);
+      handrail.rotation.x = -angle;
+      scene.add(handrail);
+
+      const strip = new THREE.Mesh(boxGeo, accentMat);
+      strip.scale.set(.1, .05, run - .5);
+      strip.position.set(bx - side * .27, (y0 + y1) / 2 + .86, z + length / 2);
+      strip.rotation.x = -angle;
+      scene.add(strip);
+
+      const paint = new THREE.Mesh(boxGeo, stuntPaintMat);
+      paint.scale.set(.32, .05, run - 1.4);
+      paint.position.set(x + side * (w / 2 - 1.05), (y0 + y1) / 2 + .08, z + length / 2);
+      paint.rotation.x = -angle;
+      scene.add(paint);
+    }
+
+    const bars = Math.max(2, Math.floor(length / 26));
+    for (let i = 1; i <= bars; i++) {
+      const t = i / (bars + 1);
+      const bar = new THREE.Mesh(boxGeo, i % 2 ? stuntPaintMat : accentMat);
+      bar.scale.set(w - 4, .04, .7);
+      bar.position.set(x, y0 + rise * t + .09, z + length * t);
+      bar.rotation.x = -angle;
+      scene.add(bar);
+    }
+
     stuntSurfaces.push({
       kind: 'ramp', minX: x - w / 2, maxX: x + w / 2,
       minZ: z, maxZ: z + length, y0, y1, axis: 'z'
     });
   }
 
-  function addStuntDeck(x, z, w, d, y, rampStart, rampLength) {
-    block(x, y - .42, z, w, .84, d, stuntMat, false, true);
-    block(x, y + .03, z, w - 1.2, .08, d - 1.2, stuntTopMat, false, true);
-    for (const sx of [-1, 1]) {
-      block(x + sx * (w / 2 - .35), y + .22, z, .22, .12, d - 2, stuntGlowMat, false, false);
-      block(x + sx * (w / 2 - 6), y + .62, z + (d / 2 - 12) * sx, 3.8, 1.1, 2.8, stuntMat, false, true);
-      block(x + sx * (w / 2 - 6), y + 1.2, z + (d / 2 - 12) * sx, .7, .55, .7, poleMat, false, true);
-    }
-    for (const sx of [-1, 1]) {
-      for (const sz of [-1, 1]) {
-        block(x + sx * (w / 2 - 2.8), y / 2, z + sz * (d / 2 - 4), 1.15, y, 1.15, poleMat, false, true);
+  function addDeckDetails(x, z, w, d, y, index) {
+    // Rounded, chamfered deck edge instead of a hard box.
+    const slab = new THREE.Mesh(deckSlabGeometry(w, d, .9, 5), stuntMat);
+    slab.position.set(x, y, z);
+    slab.receiveShadow = true;
+    scene.add(slab);
+    const top = new THREE.Mesh(deckSlabGeometry(w - 1.6, d - 1.6, .12, 4.2), stuntTopMat);
+    top.position.set(x, y + .05, z);
+    top.receiveShadow = true;
+    scene.add(top);
+
+    // Tapered piers, crossheads and diagonal bracing.
+    const pierH = y - 1.45;
+    for (const side of [-1, 1]) {
+      for (const zs of [-1, 1]) {
+        const px = x + side * (w / 2 - 4);
+        const pz = z + zs * d * .3;
+        const pier = new THREE.Mesh(pierGeo, stuntConcreteMat);
+        pier.scale.y = pierH;
+        pier.position.set(px, pierH / 2, pz);
+        pier.castShadow = true;
+        pier.receiveShadow = true;
+        scene.add(pier);
+        block(px, y - 1.15, pz, 4.2, .8, 4.2, stuntConcreteMat, true, true);
       }
+      const beamZ = z + side * d * .3;
+      block(x, y - 1.02, beamZ, w * .82, .9, 3.2, stuntConcreteMat, true, true);
+      strutBetween(x - (w / 2 - 4), 1.4, beamZ, x + (w / 2 - 4), y - 2.2, beamZ, .16);
+      strutBetween(x + (w / 2 - 4), 1.4, beamZ, x - (w / 2 - 4), y - 2.2, beamZ, .16);
     }
-    block(x, y + .22, z - d / 2 + .4, w - 2, .12, .22, stuntWarmGlowMat, false, false);
-    block(x, y + .22, z + d / 2 - .4, w - 2, .12, .22, stuntGlowMat, false, false);
-    addStuntRamp(x, rampStart, w * .66, rampLength, 0, y);
-    addStuntRamp(x, z + d / 2 - 30, w * .66, 30, y, y + 3.2);
+
+    // Solid edge barrier with a lit handrail.
+    const railLen = d - 10;
+    for (const side of [-1, 1]) {
+      const bx = x + side * (w / 2 - .42);
+      block(bx, y + .52, z, .55, 1.04, railLen, stuntConcreteMat, false, true);
+      block(bx, y + 1.1, z, .68, .12, railLen, stuntRailMat, false, false);
+      block(bx - side * .3, y + .3, z, .1, .12, railLen - .6, side < 0 ? stuntGlowMat : stuntWarmGlowMat, false, false);
+    }
+    block(x, y + .06, z - d / 2 + .6, w - 3, .06, .35, stuntWarmGlowMat, false, false);
+    block(x, y + .06, z + d / 2 - .6, w - 3, .06, .35, stuntGlowMat, false, false);
+
+    // Entry gantry with a deck sign.
+    const gateZ = z - d / 2 + 5;
+    const gateMat = makeDeckSign(`SKY DECK ${String(index).padStart(2, '0')}`);
+    for (const side of [-1, 1]) {
+      const gx = x + side * (w / 2 - 2.2);
+      block(gx, y + 2.3, gateZ, .55, 4.6, .55, stuntMat, true, true);
+      block(gx, y + 4.62, gateZ, 1.2, .18, 1.2, stuntWarmGlowMat, false, false);
+    }
+    block(x, y + 4.45, gateZ, w - 4, .32, .5, stuntMat, false, false);
+    const panel = new THREE.Mesh(boxGeo, gateMat);
+    panel.scale.set(14, 2.8, .36);
+    panel.position.set(x, y + 3.72, gateZ);
+    panel.castShadow = true;
+    scene.add(panel);
+
+    // Warm lamp masts and planted corners.
+    for (const side of [-1, 1]) {
+      const lx = x + side * (w / 2 - 4.5);
+      const lz = z + d * .28;
+      const pole = new THREE.Mesh(cylinderGeo, poleMat);
+      pole.scale.set(.16, 4.2, .16);
+      pole.position.set(lx, y + 2.1, lz);
+      scene.add(pole);
+      block(lx - side * .75, y + 4.15, lz, 1.6, .16, .2, poleMat, false, false);
+      block(lx - side * 1.5, y + 3.98, lz, .95, .22, .55, stuntWarmGlowMat, false, false);
+
+      const px = x + side * (w / 2 - 7.5);
+      const pz = z + d / 2 - 9;
+      const pot = new THREE.Mesh(cylinderGeo, stuntConcreteMat);
+      pot.scale.set(.95, .8, .95);
+      pot.position.set(px, y + .4, pz);
+      scene.add(pot);
+      const bush = new THREE.Mesh(sphereGeo, leafMat);
+      bush.scale.set(1.35, 1.0, 1.35);
+      bush.position.set(px, y + 1.15, pz);
+      bush.castShadow = true;
+      scene.add(bush);
+    }
+  }
+
+  function addStuntDeck(x, z, w, d, y, rampStart, rampLength, index) {
+    addDeckDetails(x, z, w, d, y, index);
+    addRamp(x, rampStart, w * .66, rampLength, 0, 0, y, stuntGlowMat);
+
+    // Two-stage kicker: a gentle transition and then a steeper launch lip.
+    const kickerZ = z + d / 2 - 30;
+    addRamp(x, kickerZ, w * .66, 16, y, y, y + 1, stuntWarmGlowMat);
+    addRamp(x, kickerZ + 16, w * .66, 14, y, y + 1, y + 3.4, stuntWarmGlowMat);
+    block(x, y + 3.4, z + d / 2 - .35, w * .66, .12, .5, stuntWarmGlowMat, false, false);
+
+    // Hazard chevrons across the launch face, visible from the street below.
+    for (let i = -3; i <= 3; i++) {
+      const stripe = new THREE.Mesh(boxGeo, stuntWarmGlowMat);
+      stripe.scale.set(.5, 2.2, .06);
+      stripe.position.set(x + i * 4.1, y + 1.75, z + d / 2 + .15);
+      stripe.rotation.z = Math.PI / 4;
+      scene.add(stripe);
+    }
+    for (const side of [-1, 1]) {
+      block(x + side * (w * .33 - 1), y + 3.62, z + d / 2 - .3, .7, .32, .7, stuntWarmGlowMat, false, false);
+    }
+
     stuntSurfaces.push({ kind: 'deck', minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, y });
     stuntDecks.push({ x, z, w, d, y });
   }
 
-  addStuntDeck(110, 520, 52, 120, 9, 340, 120);
-  addStuntDeck(-330, 0, 52, 100, 11, -180, 130);
-  addStuntDeck(550, -300, 52, 100, 10, -470, 120);
+  addStuntDeck(110, 520, 52, 120, 9, 340, 120, 1);
+  addStuntDeck(-330, 0, 52, 100, 11, -180, 130, 2);
+  addStuntDeck(550, -300, 52, 100, 10, -470, 120, 3);
 
   // --- Collectible street rings ---------------------------------------------
   const rings = [];
@@ -1753,14 +2139,19 @@ title: "Forza Horizon 10"
     vF -= Math.sign(vF) * .18 * dt;
     vF = clamp(vF, -12, activeCar.top);
 
-    const maxSteer = activeCar.steer / (1 + Math.abs(vF) * .018);
+    // Keep steering authority alive at speed, then open the yaw cap as speed
+    // climbs so fast corners and drifts tighten instead of washing wide.
+    const speedAbs = Math.abs(vF);
+    const speedT = clamp((speedAbs - 18) / 42, 0, 1);
+    const maxSteer = activeCar.steer / (1 + speedAbs * (.018 - .006 * speedT));
     const targetSteer = steerInput * maxSteer;
     state.steer += (targetSteer - state.steer) * Math.min(1, 13 * dt);
 
-    const baseYaw = Math.abs(vF) > .55
-      ? (vF / 2.6) * Math.tan(state.steer) * (handbrake ? 1.35 : 1)
+    const baseYaw = speedAbs > .55
+      ? (vF / 2.6) * Math.tan(state.steer) * (handbrake ? 1.4 : 1)
       : 0;
-    const maxYaw = (handbrake ? activeCar.driftYaw : activeCar.yaw) / Math.max(3.2, Math.abs(vF) * .58);
+    const yawBoost = 1 + speedT * (handbrake ? 1 : .75);
+    const maxYaw = ((handbrake ? activeCar.driftYaw : activeCar.yaw) * yawBoost) / Math.max(3.2, speedAbs * .58);
     const yaw = clamp(baseYaw, -maxYaw, maxYaw);
     state.heading += yaw * dt;
 
