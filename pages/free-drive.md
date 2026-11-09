@@ -32,12 +32,49 @@ title: "Forza Horizon 10"
   #minimap { position: absolute; left: 22px; bottom: 22px; width: 180px; height: 180px; padding: 8px; box-sizing: content-box; border-radius: 14px; background: rgba(8, 12, 18, .66); border: 1px solid rgba(255, 255, 255, .14); box-shadow: 0 12px 34px rgba(0, 0, 0, .38); }
   #toast { position: absolute; top: 92px; left: 50%; transform: translate(-50%, -8px); padding: 10px 18px; border-radius: 999px; background: rgba(9, 13, 20, .8); border: 1px solid rgba(255, 255, 255, .16); font-size: 12px; letter-spacing: .04em; opacity: 0; transition: .25s; white-space: nowrap; }
   #toast.on { opacity: 1; transform: translate(-50%, 0); }
+  #street { position: absolute; left: 22px; bottom: 230px; width: 198px; box-sizing: border-box; padding: 10px 12px 9px; }
+  #street .label { font-size: 9px; letter-spacing: .2em; font-weight: 700; color: #aeb9c7; text-transform: uppercase; }
+  #street .value { margin: 2px 0 3px; font-size: 30px; line-height: 1; font-weight: 800; font-style: italic; letter-spacing: -.03em; font-variant-numeric: tabular-nums; text-shadow: 0 4px 18px rgba(0, 0, 0, .45); }
+  #street .meta { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 9px; font-weight: 700; letter-spacing: .08em; color: #9fb0c2; }
+  #mult.hot { color: #ffd166; text-shadow: 0 0 12px rgba(255, 209, 102, .5); }
+  #street .best { margin-top: 5px; font-size: 8px; letter-spacing: .1em; color: #77889a; }
   #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 5; background: radial-gradient(ellipse at 50% 46%, transparent 50%, rgba(2, 6, 12, .44) 100%); }
+  #garage { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; padding: 24px; overflow: auto; background: radial-gradient(circle at 50% 30%, rgba(17, 31, 50, .82), rgba(4, 8, 14, .96)); backdrop-filter: blur(12px); }
+  #garage.open { display: flex; }
+  .garage-panel { width: min(900px, 100%); max-height: 92vh; overflow: auto; padding: 28px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 20px; background: linear-gradient(145deg, rgba(18, 25, 36, .97), rgba(9, 14, 23, .97)); box-shadow: 0 28px 90px rgba(0, 0, 0, .62), inset 0 1px 0 rgba(255, 255, 255, .08); }
+  .garage-kicker { color: #52e5ff; font-size: 10px; font-weight: 800; letter-spacing: .28em; text-transform: uppercase; }
+  .garage-panel h2 { margin: 7px 0 6px; font-size: clamp(27px, 5vw, 42px); line-height: 1; letter-spacing: -.035em; font-style: italic; }
+  .garage-sub { margin: 0 0 20px; color: #9fb0c2; font-size: 12px; line-height: 1.55; }
+  .car-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .car-card { position: relative; display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px; color: #f2f6fa; text-align: left; border: 1px solid rgba(255, 255, 255, .14); border-radius: 14px; background: linear-gradient(145deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02)); cursor: pointer; font: inherit; transition: border-color .18s, transform .18s, background .18s; }
+  .car-card:hover { border-color: rgba(255, 255, 255, .34); transform: translateY(-2px); }
+  .car-card.selected { border-color: #ffd166; background: linear-gradient(145deg, rgba(255, 209, 102, .14), rgba(255, 255, 255, .035)); box-shadow: inset 0 0 0 1px rgba(255, 209, 102, .28); }
+  .car-card.selected::after { content: 'SELECTED'; position: absolute; top: 9px; right: 10px; color: #ffd166; font-size: 8px; font-weight: 800; letter-spacing: .14em; }
+  .car-swatch { width: 46px; height: 46px; border-radius: 11px; border: 1px solid rgba(255, 255, 255, .3); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .38), 0 6px 16px rgba(0, 0, 0, .3); }
+  .car-name { display: block; padding-right: 52px; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
+  .car-tag { display: block; margin-top: 3px; color: #9fb0c2; font-size: 10px; }
+  .car-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+  .car-stat { display: block; color: #93a3b4; font-size: 7px; font-weight: 800; letter-spacing: .1em; }
+  .car-stat i { display: block; height: 4px; margin-bottom: 4px; border-radius: 99px; background: linear-gradient(90deg, #52e5ff, #ffd166); box-shadow: 0 0 8px rgba(82, 229, 255, .18); }
+  .garage-actions { display: flex; align-items: center; gap: 14px; margin-top: 20px; flex-wrap: wrap; }
+  #garage-close { padding: 12px 22px; border: 0; border-radius: 10px; background: linear-gradient(135deg, #ffd166, #ff9f43); color: #17120b; font: inherit; font-size: 12px; font-weight: 900; letter-spacing: .12em; cursor: pointer; box-shadow: 0 8px 24px rgba(255, 159, 67, .22); }
+  #garage-close:hover { filter: brightness(1.08); }
+  .garage-actions span { color: #7f91a3; font-size: 10px; letter-spacing: .04em; }
   @media (max-width: 760px) {
+    #garage { padding: 12px; }
+    .garage-panel { padding: 20px 16px; border-radius: 16px; }
+    .car-list { grid-template-columns: 1fr; }
+    .garage-actions span { display: none; }
+    #garage-close { width: 100%; }
     #help { display: none; }
     #speedo { width: 165px; right: 12px; bottom: 12px; padding: 11px 14px 10px; }
     #speed { font-size: 48px; }
     #minimap { width: 120px; height: 120px; left: 12px; bottom: 12px; padding: 6px; }
+    #street { left: 12px; bottom: 154px; width: 134px; padding: 8px 9px 7px; }
+    #street .value { font-size: 22px; }
+    #street .label { font-size: 8px; }
+    #street .meta { font-size: 8px; }
+    #street .best { margin-top: 4px; font-size: 7px; }
     #place { top: 12px; left: 12px; padding: 9px 12px; min-width: 0; }
     #place .where { font-size: 17px; }
     #toast { top: 78px; font-size: 11px; }
@@ -54,7 +91,9 @@ title: "Forza Horizon 10"
     <div><b>WASD / ARROWS</b> drive</div>
     <div><b>SPACE</b> handbrake</div>
     <div><b>R</b> reset &nbsp; <b>C</b> camera</div>
-    <div><b>M</b> sound</div>
+    <div><b>M</b> sound &nbsp; <b>G</b> garage</div>
+    <div><b>GOLD RINGS</b> collect for score</div>
+    <div><b>CYAN DECKS</b> hit the sky stunts</div>
   </div>
   <div id="speedo" class="panel">
     <div id="gear">N</div>
@@ -64,10 +103,28 @@ title: "Forza Horizon 10"
     <div class="rpm"><i id="rpm-fill"></i></div>
     <div id="drift">DRIFT</div>
   </div>
+  <div id="street" class="panel" aria-label="Street score">
+    <div class="label">Street score</div>
+    <div class="value" id="score">0</div>
+    <div class="meta"><span id="mult">x1</span><span id="rings">RINGS 0/8</span></div>
+    <div class="best">BEST <span id="best">0</span></div>
+  </div>
   <canvas id="minimap" width="180" height="180"></canvas>
   <div id="toast"></div>
 </div>
 <div id="vignette"></div>
+<div id="garage" role="dialog" aria-modal="true" aria-label="Choose a car" aria-hidden="true">
+  <div class="garage-panel">
+    <div class="garage-kicker">Shibuya Underground</div>
+    <h2>Choose your ride</h2>
+    <p class="garage-sub">Every build has its own grip, drift angle and top speed. Press <b>G</b> anytime to switch, or hit the streets and find the cyan sky decks.</p>
+    <div id="car-list" class="car-list"></div>
+    <div class="garage-actions">
+      <button id="garage-close" type="button">HIT THE STREETS</button>
+      <span>WASD drive · SPACE drift · R reset · C camera</span>
+    </div>
+  </div>
+</div>
 
 <script type="importmap">
   { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -310,10 +367,101 @@ title: "Forza Horizon 10"
   const boxGeo = new THREE.BoxGeometry(1, 1, 1);
   const sphereGeo = new THREE.SphereGeometry(1, 10, 8);
   const cylinderGeo = new THREE.CylinderGeometry(1, 1, 1, 10);
-  const wheelGeo = new THREE.CylinderGeometry(.36, .36, .27, 18);
+  const wheelGeo = new THREE.CylinderGeometry(.36, .36, .27, 24);
   wheelGeo.rotateZ(Math.PI / 2);
-  const rimGeo = new THREE.CylinderGeometry(.19, .19, .29, 12);
+  const rimGeo = new THREE.CylinderGeometry(.19, .19, .29, 16);
   rimGeo.rotateZ(Math.PI / 2);
+
+  // Smooth, tapered car shells instead of stacked boxes.
+  function makeCarHullGeometry(sections, radial = 20) {
+    const positions = [];
+    const indices = [];
+    for (const s of sections) {
+      const mid = (s.b + s.t) / 2;
+      const halfH = (s.t - s.b) / 2;
+      for (let i = 0; i < radial; i++) {
+        const a = (i / radial) * Math.PI * 2;
+        const cx = Math.cos(a);
+        const sy = Math.sin(a);
+        positions.push(
+          s.w * Math.sign(cx) * Math.pow(Math.abs(cx), .72),
+          mid + halfH * Math.sign(sy) * Math.pow(Math.abs(sy), .68),
+          s.z
+        );
+      }
+    }
+    for (let s = 0; s < sections.length - 1; s++) {
+      const a0 = s * radial;
+      const b0 = (s + 1) * radial;
+      for (let i = 0; i < radial; i++) {
+        const j = (i + 1) % radial;
+        indices.push(a0 + i, a0 + j, b0 + j, a0 + i, b0 + j, b0 + i);
+      }
+    }
+    const rearCenter = positions.length / 3;
+    const first = sections[0];
+    positions.push(0, (first.b + first.t) / 2, first.z);
+    for (let i = 0; i < radial; i++) indices.push(rearCenter, (i + 1) % radial, i);
+    const frontCenter = positions.length / 3;
+    const last = sections[sections.length - 1];
+    positions.push(0, (last.b + last.t) / 2, last.z);
+    const base = (sections.length - 1) * radial;
+    for (let i = 0; i < radial; i++) indices.push(frontCenter, base + i, base + (i + 1) % radial);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  function makeRoundedBoxGeometry(w, h, d, radius) {
+    const rr = Math.min(radius, w / 2, h / 2);
+    const shape = new THREE.Shape();
+    const x = -w / 2;
+    const y = -h / 2;
+    shape.moveTo(x + rr, y);
+    shape.lineTo(x + w - rr, y);
+    shape.quadraticCurveTo(x + w, y, x + w, y + rr);
+    shape.lineTo(x + w, y + h - rr);
+    shape.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+    shape.lineTo(x + rr, y + h);
+    shape.quadraticCurveTo(x, y + h, x, y + h - rr);
+    shape.lineTo(x, y + rr);
+    shape.quadraticCurveTo(x, y, x + rr, y);
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: d,
+      bevelEnabled: true,
+      bevelSegments: 2,
+      steps: 1,
+      bevelSize: Math.min(rr * .35, d * .18),
+      bevelThickness: Math.min(rr * .35, d * .18)
+    });
+    geo.translate(0, 0, -d / 2);
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  const carBodyGeo = makeCarHullGeometry([
+    { z: -2.26, w: .58, b: .52, t: .86 },
+    { z: -2.08, w: .90, b: .38, t: .98 },
+    { z: -1.58, w: 1.03, b: .32, t: 1.05 },
+    { z: -.55, w: 1.06, b: .32, t: 1.06 },
+    { z: .65, w: 1.04, b: .32, t: 1.02 },
+    { z: 1.62, w: 1.02, b: .34, t: .98 },
+    { z: 2.12, w: .90, b: .40, t: .90 },
+    { z: 2.28, w: .62, b: .50, t: .78 }
+  ], 20);
+  const carCabinGeo = makeCarHullGeometry([
+    { z: -1.34, w: .35, b: .98, t: 1.10 },
+    { z: -1.12, w: .65, b: .99, t: 1.32 },
+    { z: -.72, w: .76, b: .99, t: 1.53 },
+    { z: -.25, w: .76, b: .99, t: 1.56 },
+    { z: .35, w: .70, b: .99, t: 1.52 },
+    { z: .78, w: .58, b: .99, t: 1.32 },
+    { z: 1.04, w: .36, b: .99, t: 1.10 },
+    { z: 1.12, w: .18, b: 1.0, t: 1.04 }
+  ], 18);
+  const roundedGeo = makeRoundedBoxGeometry(1, 1, 1, .2);
 
   const asphaltMat = new THREE.MeshStandardMaterial({ map: asphaltTex, color: 0xffffff, roughness: .96, metalness: .02 });
   const sidewalkMat = new THREE.MeshStandardMaterial({ map: sidewalkTex, color: 0xd2d4d5, roughness: .9 });
@@ -725,66 +873,41 @@ title: "Forza Horizon 10"
       ? new THREE.MeshPhysicalMaterial({ color, metalness: .5, roughness: .24, clearcoat: 1, clearcoatRoughness: .16 })
       : paint(color);
 
-    const lower = new THREE.Mesh(boxGeo, bodyMat);
-    lower.scale.set(1.96, .52, 4.36);
-    lower.position.set(0, .63, 0);
+    const lower = new THREE.Mesh(carBodyGeo, bodyMat);
     lower.castShadow = true;
+    lower.receiveShadow = true;
     body.add(lower);
 
-    if (hero) {
-      const hood = new THREE.Mesh(boxGeo, bodyMat);
-      hood.scale.set(1.82, .16, 1.35);
-      hood.position.set(0, .94, 1.48);
-      body.add(hood);
-
-      const trunk = new THREE.Mesh(boxGeo, bodyMat);
-      trunk.scale.set(1.8, .15, .92);
-      trunk.position.set(0, .94, -1.64);
-      body.add(trunk);
-    }
-
-    const cabin = new THREE.Mesh(boxGeo, glassMat);
-    cabin.scale.set(1.6, .5, 1.92);
-    cabin.position.set(0, 1.16, -.12);
+    const cabin = new THREE.Mesh(carCabinGeo, glassMat);
     cabin.castShadow = true;
     body.add(cabin);
 
-    const roof = new THREE.Mesh(boxGeo, bodyMat);
-    roof.scale.set(1.45, .1, 1.55);
-    roof.position.set(0, 1.44, -.12);
+    const roof = new THREE.Mesh(roundedGeo, bodyMat);
+    roof.scale.set(1.24, .055, 1.42);
+    roof.position.set(0, 1.55, -.14);
     roof.castShadow = true;
     body.add(roof);
 
     if (hero) {
-      const frontBumper = new THREE.Mesh(boxGeo, bodyMat);
-      frontBumper.scale.set(1.88, .24, .22);
-      frontBumper.position.set(0, .45, 2.21);
-      body.add(frontBumper);
-
-      const rearBumper = new THREE.Mesh(boxGeo, bodyMat);
-      rearBumper.scale.set(1.88, .24, .22);
-      rearBumper.position.set(0, .45, -2.21);
-      body.add(rearBumper);
-
-      const grille = new THREE.Mesh(boxGeo, signalMat);
-      grille.scale.set(1.05, .19, .06);
-      grille.position.set(0, .55, 2.24);
+      const grille = new THREE.Mesh(roundedGeo, signalMat);
+      grille.scale.set(.72, .13, .06);
+      grille.position.set(0, .56, 2.235);
       body.add(grille);
     }
 
     const headLights = [];
     if (hero) {
-      for (const x of [-.64, .64]) {
-        const light = new THREE.Mesh(boxGeo, headMat);
-        light.scale.set(.48, .15, .055);
-        light.position.set(x, .82, 2.24);
+      for (const x of [-.52, .52]) {
+        const light = new THREE.Mesh(roundedGeo, headMat);
+        light.scale.set(.36, .11, .08);
+        light.position.set(x, .8, 2.2);
         body.add(light);
         headLights.push(light);
       }
     } else {
-      const bar = new THREE.Mesh(boxGeo, headMat);
-      bar.scale.set(1.3, .12, .055);
-      bar.position.set(0, .8, 2.24);
+      const bar = new THREE.Mesh(roundedGeo, headMat);
+      bar.scale.set(1.12, .11, .07);
+      bar.position.set(0, .8, 2.2);
       body.add(bar);
       headLights.push(bar);
     }
@@ -794,54 +917,57 @@ title: "Forza Horizon 10"
       : tailMat;
     const rearLights = [];
     if (hero) {
-      for (const x of [-.67, .67]) {
-        const light = new THREE.Mesh(boxGeo, brakeMat);
-        light.scale.set(.42, .15, .055);
-        light.position.set(x, .82, -2.24);
+      for (const x of [-.52, .52]) {
+        const light = new THREE.Mesh(roundedGeo, brakeMat);
+        light.scale.set(.34, .11, .07);
+        light.position.set(x, .8, -2.18);
         body.add(light);
         rearLights.push(light);
       }
     } else {
-      const bar = new THREE.Mesh(boxGeo, brakeMat);
-      bar.scale.set(1.3, .12, .055);
-      bar.position.set(0, .8, -2.24);
+      const bar = new THREE.Mesh(roundedGeo, brakeMat);
+      bar.scale.set(1.12, .11, .07);
+      bar.position.set(0, .8, -2.18);
       body.add(bar);
       rearLights.push(bar);
     }
 
+    let spoiler = null;
+    const wingEndplates = [];
     if (hero) {
-      const plate = new THREE.Mesh(boxGeo, plateMat);
-      plate.scale.set(.62, .17, .035);
-      plate.position.set(0, .55, -2.245);
+      const plate = new THREE.Mesh(roundedGeo, plateMat);
+      plate.scale.set(.54, .15, .035);
+      plate.position.set(0, .57, -2.275);
       body.add(plate);
-    }
 
-
-    if (hero) {
-      const splitter = new THREE.Mesh(boxGeo, signalMat);
-      splitter.scale.set(1.92, .08, .4);
-      splitter.position.set(0, .3, 2.12);
+      const splitter = new THREE.Mesh(roundedGeo, signalMat);
+      splitter.scale.set(1.94, .06, .46);
+      splitter.position.set(0, .3, 2.06);
       body.add(splitter);
 
-      const diffuser = new THREE.Mesh(boxGeo, signalMat);
-      diffuser.scale.set(1.72, .12, .35);
-      diffuser.position.set(0, .3, -2.1);
+      const diffuser = new THREE.Mesh(roundedGeo, signalMat);
+      diffuser.scale.set(1.72, .1, .38);
+      diffuser.position.set(0, .3, -2.03);
       body.add(diffuser);
 
-      const spoiler = new THREE.Mesh(boxGeo, bodyMat);
-      spoiler.scale.set(1.7, .08, .42);
-      spoiler.position.set(0, 1.18, -2.03);
+      spoiler = new THREE.Mesh(roundedGeo, bodyMat);
+      spoiler.scale.set(1.72, .06, .48);
+      spoiler.position.set(0, 1.22, -2.03);
       spoiler.castShadow = true;
       body.add(spoiler);
-      const thirdBrake = new THREE.Mesh(boxGeo, brakeMat);
-      thirdBrake.scale.set(.62, .055, .05);
-      thirdBrake.position.set(0, 1.235, -2.245);
-      body.add(thirdBrake);
+      for (const x of [-1.0, 1.0]) {
+        const endplate = new THREE.Mesh(roundedGeo, bodyMat);
+        endplate.scale.set(.055, .2, .48);
+        endplate.position.set(x, 1.28, -2.03);
+        endplate.visible = false;
+        body.add(endplate);
+        wingEndplates.push(endplate);
+      }
 
-      const rearWindow = new THREE.Mesh(boxGeo, glassMat);
-      rearWindow.scale.set(1.3, .34, .05);
-      rearWindow.position.set(0, 1.2, -1.095);
-      body.add(rearWindow);
+      const thirdBrake = new THREE.Mesh(roundedGeo, brakeMat);
+      thirdBrake.scale.set(.58, .04, .05);
+      thirdBrake.position.set(0, 1.252, -2.05);
+      body.add(thirdBrake);
 
       for (const x of [-.55, .55]) {
         const pipe = new THREE.Mesh(cylinderGeo, rimMat);
@@ -851,16 +977,16 @@ title: "Forza Horizon 10"
         body.add(pipe);
       }
       for (const x of [-.65, .65]) {
-        const strut = new THREE.Mesh(boxGeo, signalMat);
-        strut.scale.set(.07, .28, .1);
-        strut.position.set(x, 1.01, -2.02);
+        const strut = new THREE.Mesh(roundedGeo, signalMat);
+        strut.scale.set(.06, .3, .08);
+        strut.position.set(x, 1.05, -2.02);
         body.add(strut);
       }
 
       for (const x of [-1.02, 1.02]) {
-        const mirror = new THREE.Mesh(boxGeo, bodyMat);
-        mirror.scale.set(.24, .11, .2);
-        mirror.position.set(x, 1.1, .55);
+        const mirror = new THREE.Mesh(roundedGeo, bodyMat);
+        mirror.scale.set(.24, .09, .16);
+        mirror.position.set(x, 1.08, .55);
         body.add(mirror);
       }
     }
@@ -882,7 +1008,7 @@ title: "Forza Horizon 10"
       if (z > 0) frontPivots.push(pivot);
     }
 
-    root.userData = { body, wheels, frontPivots, brakeMat, rearLights, headLights };
+    root.userData = { body, wheels, frontPivots, brakeMat, rearLights, headLights, bodyMat, spoiler, wingEndplates };
     return root;
   }
 
@@ -897,6 +1023,33 @@ title: "Forza Horizon 10"
   contactShadow.rotation.x = -Math.PI / 2;
   contactShadow.position.y = .02;
   hero.add(contactShadow);
+
+  // --- Garage / car builds --------------------------------------------------
+  const CARS = [
+    { id: 'crimson', name: 'Crimson GT', tag: 'Faster balanced street build', color: 0xd21f3c, accel: 20.2, top: 76, grip: 11.8, driftGrip: 1.35, handbrakeDrag: 2.6, driftDrag: .16, steer: .68, yaw: 13.5, driftYaw: 18.5, speed: 4.2, gripBar: 3.8, driftBar: 3.4 },
+    { id: 'midnight', name: 'Midnight Drift', tag: 'Loose rear, carries speed', color: 0x2f6bff, accel: 19, top: 71, grip: 10.2, driftGrip: .82, handbrakeDrag: 2, driftDrag: .08, steer: .74, yaw: 15, driftYaw: 21, speed: 3.7, gripBar: 3.1, driftBar: 5 },
+    { id: 'solar', name: 'Solar Apex', tag: 'Top speed monster', color: 0xffb21a, accel: 22.4, top: 88, grip: 12.1, driftGrip: 1.45, handbrakeDrag: 2.8, driftDrag: .18, steer: .65, yaw: 13.2, driftYaw: 17, speed: 5, gripBar: 4, driftBar: 2.8 },
+    { id: 'mint', name: 'Mint Machine', tag: 'Grip for days', color: 0x2fe0a4, accel: 18.2, top: 68, grip: 13.4, driftGrip: 1.55, handbrakeDrag: 3, driftDrag: .22, steer: .76, yaw: 13.6, driftYaw: 16.5, speed: 3.2, gripBar: 5, driftBar: 3.2 },
+    { id: 'gt3rs', name: 'Porsche 911 GT3 RS', tag: 'Track-bred flat-six', color: 0x8ed126, accel: 23.5, top: 90, grip: 14.2, driftGrip: 1.15, handbrakeDrag: 2.2, driftDrag: .1, steer: .75, yaw: 15.5, driftYaw: 20, speed: 5.5, gripBar: 5, driftBar: 4.1 }
+  ];
+  const CAR_KEY = 'forza.car.v1';
+  let selectedCarIndex = 0;
+  try {
+    const savedCar = Number(localStorage.getItem(CAR_KEY));
+    if (Number.isInteger(savedCar) && CARS[savedCar]) selectedCarIndex = savedCar;
+  } catch (e) {}
+  let activeCar = CARS[selectedCarIndex];
+
+  function applyCarLook(car) {
+    hero.userData.bodyMat.color.setHex(car.color);
+    const gt3 = car.id === 'gt3rs';
+    if (hero.userData.spoiler) {
+      hero.userData.spoiler.scale.set(gt3 ? 2.02 : 1.72, gt3 ? .055 : .06, gt3 ? .62 : .48);
+      hero.userData.spoiler.position.y = gt3 ? 1.27 : 1.22;
+    }
+    for (const endplate of hero.userData.wingEndplates) endplate.visible = gt3;
+  }
+  applyCarLook(activeCar);
 
   // --- Traffic --------------------------------------------------------------
   const traffic = [];
@@ -928,6 +1081,7 @@ title: "Forza Horizon 10"
       speed: rand(6, 11),
       target: rand(7, 12),
       hitTimer: 0,
+      nearMissCd: 0,
       wheels: root.userData.wheels
     };
     if (axis === 'z') root.position.set(road + laneOffset, 0, position);
@@ -977,6 +1131,97 @@ title: "Forza Horizon 10"
     parkedCars.push(car);
   }
 
+  // --- Sky decks, ramps and stunt surfaces ----------------------------------
+  const stuntSurfaces = [];
+  const stuntDecks = [];
+  const stuntMat = new THREE.MeshStandardMaterial({ color: 0x39434c, roughness: .88, metalness: .16 });
+  const stuntTopMat = new THREE.MeshStandardMaterial({ color: 0x20272e, roughness: .93, metalness: .08 });
+  const stuntGlowMat = neonMats[1];
+  const stuntWarmGlowMat = neonMats[2];
+
+  function addStuntRamp(x, z, w, length, y0, y1) {
+    const angle = Math.atan2(y1 - y0, length);
+    const ramp = new THREE.Mesh(boxGeo, stuntMat);
+    ramp.scale.set(w, .34, Math.hypot(length, y1 - y0));
+    ramp.position.set(x, (y0 + y1) / 2 - .1, z + length / 2);
+    ramp.rotation.x = -angle;
+    ramp.castShadow = false;
+    ramp.receiveShadow = true;
+    scene.add(ramp);
+    block(x, y0 + .08, z + .35, w, .12, .7, stuntGlowMat, false, false);
+    block(x, y1 + .1, z + length - .3, w - 2, .12, .55, stuntWarmGlowMat, false, false);
+    stuntSurfaces.push({
+      kind: 'ramp', minX: x - w / 2, maxX: x + w / 2,
+      minZ: z, maxZ: z + length, y0, y1, axis: 'z'
+    });
+  }
+
+  function addStuntDeck(x, z, w, d, y, rampStart, rampLength) {
+    block(x, y - .42, z, w, .84, d, stuntMat, false, true);
+    block(x, y + .03, z, w - 1.2, .08, d - 1.2, stuntTopMat, false, true);
+    for (const sx of [-1, 1]) {
+      block(x + sx * (w / 2 - .35), y + .22, z, .22, .12, d - 2, stuntGlowMat, false, false);
+      block(x + sx * (w / 2 - 6), y + .62, z + (d / 2 - 12) * sx, 3.8, 1.1, 2.8, stuntMat, false, true);
+      block(x + sx * (w / 2 - 6), y + 1.2, z + (d / 2 - 12) * sx, .7, .55, .7, poleMat, false, true);
+    }
+    for (const sx of [-1, 1]) {
+      for (const sz of [-1, 1]) {
+        block(x + sx * (w / 2 - 2.8), y / 2, z + sz * (d / 2 - 4), 1.15, y, 1.15, poleMat, false, true);
+      }
+    }
+    block(x, y + .22, z - d / 2 + .4, w - 2, .12, .22, stuntWarmGlowMat, false, false);
+    block(x, y + .22, z + d / 2 - .4, w - 2, .12, .22, stuntGlowMat, false, false);
+    addStuntRamp(x, rampStart, w * .66, rampLength, 0, y);
+    addStuntRamp(x, z + d / 2 - 30, w * .66, 30, y, y + 3.2);
+    stuntSurfaces.push({ kind: 'deck', minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, y });
+    stuntDecks.push({ x, z, w, d, y });
+  }
+
+  addStuntDeck(110, 520, 52, 120, 9, 340, 120);
+  addStuntDeck(-330, 0, 52, 100, 11, -180, 130);
+  addStuntDeck(550, -300, 52, 100, 10, -470, 120);
+
+  // --- Collectible street rings ---------------------------------------------
+  const rings = [];
+  const ringGeo = new THREE.TorusGeometry(3.1, .28, 8, 28);
+  const ringMat = new THREE.MeshStandardMaterial({
+    color: 0xffc247,
+    emissive: 0xff8a00,
+    emissiveIntensity: 1.4,
+    metalness: .6,
+    roughness: .22
+  });
+  const ringGlowMat = new THREE.SpriteMaterial({
+    map: sunTex,
+    color: 0xffc76a,
+    transparent: true,
+    opacity: .55,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+  const ringPoints = [
+    [110, -30, 'z'],
+    [110, 780, 'z'],
+    [-330, -300, 'z'],
+    [550, -700, 'z'],
+    [-600, 200, 'x'],
+    [200, 600, 'x'],
+    [600, -200, 'x'],
+    [-200, -600, 'x']
+  ];
+  for (const [x, z, axis] of ringPoints) {
+    const group = new THREE.Group();
+    const torus = new THREE.Mesh(ringGeo, ringMat);
+    group.add(torus);
+    const glow = new THREE.Sprite(ringGlowMat);
+    glow.scale.set(11, 11, 1);
+    group.add(glow);
+    group.position.set(x, 3.3, z);
+    if (axis === 'x') group.rotation.y = Math.PI / 2;
+    scene.add(group);
+    rings.push({ group, spin: torus, x, z, phase: rings.length });
+  }
+
   const trafficShadowGeo = new THREE.PlaneGeometry(4.6, 4.6);
   trafficShadowGeo.rotateX(-Math.PI / 2);
   const trafficShadowMat = new THREE.MeshBasicMaterial({
@@ -1019,6 +1264,12 @@ title: "Forza Horizon 10"
     wheelSpin: 0,
     bodyRoll: 0,
     bodyPitch: 0,
+    y: 0,
+    vy: 0,
+    airborne: false,
+    airTime: 0,
+    surfaceSlope: 0,
+    chassisPitch: 0,
     speedKmh: 0,
     gear: 'N',
     drifting: false,
@@ -1026,8 +1277,22 @@ title: "Forza Horizon 10"
     shake: 0,
     vForward: 0,
     lastVForward: 0,
-    lateral: 0
+    lateral: 0,
+    score: 0,
+    best: 0,
+    multiplier: 1,
+    comboTimer: 0,
+    comboProgress: 0,
+    rings: 0,
+    nearMissTimer: 0
   };
+
+  const BEST_KEY = 'forza.street.best.v1';
+  try {
+    const savedBest = Math.floor(Number(localStorage.getItem(BEST_KEY)));
+    if (Number.isFinite(savedBest) && savedBest > 0) state.best = savedBest;
+  } catch (e) {}
+  let bestSaveAt = 0;
 
   const audio = {
     ctx: null,
@@ -1083,7 +1348,7 @@ title: "Forza Horizon 10"
   function updateAudio(throttle) {
     if (!audio.ready || !audio.ctx || !audio.osc) return;
     const speed = state.speedKmh;
-    const rpm = clamp(speed / 210, 0, 1);
+    const rpm = clamp(speed / (activeCar.top * 3.6), 0, 1);
     audio.osc.frequency.setTargetAtTime(42 + rpm * 155 + throttle * 18, audio.ctx.currentTime, .06);
     audio.filter.frequency.setTargetAtTime(260 + rpm * 1600 + throttle * 260, audio.ctx.currentTime, .08);
     const volume = audio.muted ? 0 : .012 + rpm * .018 + throttle * .006;
@@ -1109,14 +1374,37 @@ title: "Forza Horizon 10"
     state.vForward = 0;
     state.lastVForward = 0;
     state.lateral = 0;
+    state.y = 0;
+    state.vy = 0;
+    state.airborne = false;
+    state.airTime = 0;
+    state.surfaceSlope = 0;
+    state.chassisPitch = 0;
     state.drifting = false;
+    state.multiplier = 1;
+    state.comboTimer = 0;
+    state.comboProgress = 0;
+    state.nearMissTimer = 0;
     hero.position.copy(SPAWN);
     hero.rotation.y = 0;
+    hero.rotation.x = 0;
+    contactShadow.visible = true;
     camera.position.set(SPAWN.x, 4.4, SPAWN.z - 9);
     showToast('Reset · Shibuya Loop');
   }
 
   window.addEventListener('keydown', (e) => {
+    if (e.code === 'KeyG' && !e.repeat) {
+      e.preventDefault();
+      setGarage(!garageOpen);
+      return;
+    }
+    if (e.code === 'Escape' && garageOpen) {
+      e.preventDefault();
+      setGarage(false);
+      return;
+    }
+    if (garageOpen) return;
     const watched = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyR', 'KeyC', 'KeyM'];
     if (watched.includes(e.code)) e.preventDefault();
     keys[e.code] = true;
@@ -1141,6 +1429,60 @@ title: "Forza Horizon 10"
   });
 
   // --- Collision and physics ------------------------------------------------
+  function surfaceAt(x, z, feet = 0) {
+    let best = { y: 0, slopeX: 0, slopeZ: 0, kind: 'ground' };
+    for (const s of stuntSurfaces) {
+      if (x < s.minX || x > s.maxX || z < s.minZ || z > s.maxZ) continue;
+      let y = s.y;
+      let slopeX = 0;
+      let slopeZ = 0;
+      if (s.kind === 'ramp') {
+        const t = clamp((z - s.minZ) / Math.max(.001, s.maxZ - s.minZ), 0, 1);
+        y = s.y0 + (s.y1 - s.y0) * t;
+        slopeZ = (s.y1 - s.y0) / Math.max(.001, s.maxZ - s.minZ);
+      }
+      if (y > feet + .9) continue;
+      if (y > best.y + .001 || (y > best.y - .001 && s.kind === 'ramp' && best.kind !== 'ramp')) {
+        best = { y, slopeX, slopeZ, kind: s.kind };
+      }
+    }
+    return best;
+  }
+
+  function updateVertical(dt) {
+    if (state.airborne) {
+      state.airTime += dt;
+      state.vy -= 30 * dt;
+      state.y += state.vy * dt;
+      const surf = surfaceAt(state.pos.x, state.pos.z, state.y);
+      if (state.y <= surf.y) {
+        state.y = surf.y;
+        state.vy = 0;
+        state.airborne = false;
+        const air = state.airTime;
+        state.airTime = 0;
+        state.surfaceSlope = surf.slopeX * Math.sin(state.heading) + surf.slopeZ * Math.cos(state.heading);
+        if (air > .4) {
+          const points = Math.round(air * 260 * state.multiplier);
+          award(points, `AIR ${air.toFixed(1)}s +${points}`, 1200);
+          bumpMultiplier();
+          state.shake = Math.min(1, state.shake + Math.min(.3, air * .12));
+        }
+      }
+      return;
+    }
+
+    const surf = surfaceAt(state.pos.x, state.pos.z, state.y);
+    if (surf.y < state.y - .55) {
+      state.airborne = true;
+      state.airTime = 0;
+      state.vy = state.surfaceSlope * state.vForward;
+      return;
+    }
+    state.y = surf.y;
+    state.surfaceSlope = surf.slopeX * Math.sin(state.heading) + surf.slopeZ * Math.cos(state.heading);
+  }
+
   function collideBlocks() {
     const p = state.pos;
     for (const b of blocks) {
@@ -1167,6 +1509,7 @@ title: "Forza Horizon 10"
         }
         state.vel.multiplyScalar(.72);
         if (Math.abs(vn) > 2.5) state.shake = Math.min(1, state.shake + Math.abs(vn) * .04);
+        breakCombo();
         break;
       }
     }
@@ -1194,10 +1537,12 @@ title: "Forza Horizon 10"
     }
     state.vel.multiplyScalar(.65);
     if (Math.abs(vn) > 2) state.shake = Math.min(1, state.shake + .35);
+    breakCombo();
     if (movingCar) movingCar.hitTimer = 1.2;
   }
 
   function collideTraffic() {
+    if (state.y > 1.5) return;
     for (const car of traffic) resolveTrafficHit(car.root, car);
     for (const car of parkedCars) resolveTrafficHit(car);
   }
@@ -1215,26 +1560,26 @@ title: "Forza Horizon 10"
 
     if (throttle) {
       if (vF < -.5) vF += 18 * dt;
-      else vF += 15.5 * dt * (1 - Math.min(1, vF / 58));
+      else vF += activeCar.accel * dt * (1 - Math.min(1, vF / activeCar.top));
     }
     if (brake) {
       if (vF > .5) vF -= 27 * dt;
       else vF -= 8 * dt;
     }
-    if (handbrake) vF -= Math.sign(vF) * 11 * dt;
+    if (handbrake) vF -= Math.sign(vF) * activeCar.handbrakeDrag * dt;
 
-    vF -= vF * .045 * dt;
-    vF -= Math.sign(vF) * .32 * dt;
-    vF = clamp(vF, -12, 58);
+    vF -= vF * .022 * dt;
+    vF -= Math.sign(vF) * .18 * dt;
+    vF = clamp(vF, -12, activeCar.top);
 
-    const maxSteer = .56 / (1 + Math.abs(vF) * .038);
+    const maxSteer = activeCar.steer / (1 + Math.abs(vF) * .018);
     const targetSteer = steerInput * maxSteer;
-    state.steer += (targetSteer - state.steer) * Math.min(1, 9 * dt);
+    state.steer += (targetSteer - state.steer) * Math.min(1, 13 * dt);
 
     const baseYaw = Math.abs(vF) > .55
-      ? (vF / 2.7) * Math.tan(state.steer) * (handbrake ? 1.25 : 1)
+      ? (vF / 2.6) * Math.tan(state.steer) * (handbrake ? 1.35 : 1)
       : 0;
-    const maxYaw = (handbrake ? 15 : 9.5) / Math.max(2.5, Math.abs(vF));
+    const maxYaw = (handbrake ? activeCar.driftYaw : activeCar.yaw) / Math.max(3.2, Math.abs(vF) * .58);
     const yaw = clamp(baseYaw, -maxYaw, maxYaw);
     state.heading += yaw * dt;
 
@@ -1242,13 +1587,13 @@ title: "Forza Horizon 10"
       fwd.x * vF + right.x * vL,
       fwd.y * vF + right.y * vL
     );
-    const grip = handbrake ? 1.65 : 8.8;
+    const grip = handbrake ? activeCar.driftGrip : activeCar.grip;
     const newFwd = new THREE.Vector2(Math.sin(state.heading), Math.cos(state.heading));
     const newRight = new THREE.Vector2(-Math.cos(state.heading), Math.sin(state.heading));
     let nvF = oldVel.dot(newFwd);
     let nvL = oldVel.dot(newRight);
     nvL *= Math.exp(-grip * dt);
-    if (handbrake) nvF *= Math.exp(-.55 * dt);
+    if (handbrake) nvF *= Math.exp(-activeCar.driftDrag * dt);
     state.vel.set(newFwd.x * nvF + newRight.x * nvL, newFwd.y * nvF + newRight.y * nvL);
     state.pos.x += state.vel.x * dt;
     state.pos.z += state.vel.y * dt;
@@ -1258,29 +1603,38 @@ title: "Forza Horizon 10"
 
     state.vForward = state.vel.dot(newFwd);
     state.lateral = nvL;
-    state.speedKmh = Math.abs(state.vForward) * 3.6;
-    state.drifting = Math.abs(nvL) > 2 && state.speedKmh > 22 && Math.abs(state.vForward) > 3;
+    updateVertical(dt);
+    state.speedKmh = state.vel.length() * 3.6;
+    state.drifting = !state.airborne && Math.abs(nvL) > 2 && state.speedKmh > 14;
     state.gear = state.vForward > .5 ? 'D' : (state.vForward < -.5 ? 'R' : 'N');
 
     const accel = (vF - state.lastVForward) / Math.max(dt, .001);
     state.lastVForward = vF;
     const targetRoll = clamp(yaw * vF * .005 + nvL * .011, -.085, .085);
     const targetPitch = clamp(-accel * .0017, -.045, .045);
+    const targetChassisPitch = state.airborne
+      ? clamp(-state.vy * .02, -.16, .16)
+      : clamp(-Math.atan(state.surfaceSlope), -.2, .2);
     state.bodyRoll += (targetRoll - state.bodyRoll) * Math.min(1, 7 * dt);
     state.bodyPitch += (targetPitch - state.bodyPitch) * Math.min(1, 7 * dt);
+    state.chassisPitch += (targetChassisPitch - state.chassisPitch) * Math.min(1, 9 * dt);
 
     state.wheelSpin += vF / .36 * dt;
 
-    hero.position.set(state.pos.x, 0, state.pos.z);
+    hero.position.set(state.pos.x, state.y, state.pos.z);
     hero.rotation.y = state.heading;
+    hero.rotation.x = state.chassisPitch;
     const body = hero.userData.body;
     body.rotation.z = state.bodyRoll;
     body.rotation.x = state.bodyPitch;
     for (const wheel of hero.userData.wheels) wheel.rotation.x = state.wheelSpin;
     for (const pivot of hero.userData.frontPivots) pivot.rotation.y = state.steer;
     hero.userData.brakeMat.emissiveIntensity = (brake || handbrake) ? 2.6 : .35;
+    contactShadow.visible = !state.airborne && Math.abs(state.surfaceSlope) < .03;
 
     state.shake *= Math.exp(-5 * dt);
+    updateStuntScore(dt);
+    updateRings(dt);
   }
 
   // --- Traffic --------------------------------------------------------------
@@ -1338,6 +1692,19 @@ title: "Forza Horizon 10"
         if (car.pos < -limitX) car.pos = limitX;
         car.root.position.set(car.pos, 0, car.road + car.laneOffset);
       }
+      if (state.y < .6 && !state.airborne && state.speedKmh > 28 && car.nearMissCd <= 0 && state.nearMissTimer <= 0 && car.hitTimer <= 0) {
+        const dx = state.pos.x - car.root.position.x;
+        const dz = state.pos.z - car.root.position.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist > 3.2 && dist < 5.4) {
+          car.nearMissCd = 2.5;
+          state.nearMissTimer = 1.1;
+          const points = 100 * state.multiplier;
+          award(points, `NEAR MISS +${points}`, 800);
+          bumpMultiplier();
+        }
+      }
+      car.nearMissCd = Math.max(0, car.nearMissCd - dt);
       for (const wheel of car.wheels) wheel.rotation.x += car.speed / .36 * dt;
     }
   }
@@ -1360,9 +1727,9 @@ title: "Forza Horizon 10"
 
     if (state.camMode === 1) {
       desiredCamera.copy(state.pos).addScaledVector(fwd3, .55);
-      desiredCamera.y = 1.24;
+      desiredCamera.y = state.y + 1.24;
       lookTarget.copy(state.pos).addScaledVector(fwd3, 30);
-      lookTarget.y = 1.25;
+      lookTarget.y = state.y + 1.25;
       camera.position.lerp(desiredCamera, 1 - Math.exp(-20 * dt));
     } else {
       const back = 8.6 + speed * .085;
@@ -1377,10 +1744,10 @@ title: "Forza Horizon 10"
       }
       const height = 3.7 + speed * .018 + (camBack < back ? .9 : 0);
       desiredCamera.copy(state.pos).addScaledVector(fwd3, -camBack);
-      desiredCamera.y = height;
+      desiredCamera.y = state.y + height;
       camera.position.lerp(desiredCamera, 1 - Math.exp(-5.5 * dt));
       lookTarget.copy(state.pos).addScaledVector(fwd3, 6 + speed * .075);
-      lookTarget.y = 1.15;
+      lookTarget.y = state.y + 1.15;
     }
 
     if (state.shake > .01) {
@@ -1394,8 +1761,8 @@ title: "Forza Horizon 10"
     camera.updateProjectionMatrix();
 
     skyRig.position.copy(camera.position);
-    sunLight.position.set(state.pos.x - 110, 170, state.pos.z - 70);
-    sunLight.target.position.set(state.pos.x, 0, state.pos.z);
+    sunLight.position.set(state.pos.x - 110, 170 + state.y, state.pos.z - 70);
+    sunLight.target.position.set(state.pos.x, state.y, state.pos.z);
     sunLight.target.updateMatrixWorld();
   }
 
@@ -1403,6 +1770,10 @@ title: "Forza Horizon 10"
   const speedEl = document.getElementById('speed');
   const gearEl = document.getElementById('gear');
   const fpsEl = document.getElementById('fps');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const multEl = document.getElementById('mult');
+  const ringsEl = document.getElementById('rings');
   const rpmEl = document.getElementById('rpm-fill');
   const driftEl = document.getElementById('drift');
   const toastEl = document.getElementById('toast');
@@ -1412,6 +1783,65 @@ title: "Forza Horizon 10"
   let minimapTimer = 0;
   let fpsFrames = 0;
   let fpsWindowStart = performance.now();
+  let ringTime = 0;
+  let ringResetTimer = 0;
+
+  const garageEl = document.getElementById('garage');
+  const carListEl = document.getElementById('car-list');
+  const garageCloseEl = document.getElementById('garage-close');
+  let garageOpen = false;
+
+  function renderGarage() {
+    carListEl.innerHTML = CARS.map((car, index) => {
+      const selected = car === activeCar;
+      const hex = `#${car.color.toString(16).padStart(6, '0')}`;
+      const stat = (value) => `${Math.round(clamp(value / 5, 0, 1) * 100)}%`;
+      return `<button type="button" class="car-card${selected ? ' selected' : ''}" data-index="${index}" aria-pressed="${selected}">
+        <span class="car-swatch" style="background:${hex}"></span>
+        <span>
+          <span class="car-name">${car.name}</span>
+          <span class="car-tag">${car.tag}</span>
+          <span class="car-stats">
+            <span class="car-stat"><i style="width:${stat(car.speed)}"></i>SPEED</span>
+            <span class="car-stat"><i style="width:${stat(car.gripBar)}"></i>GRIP</span>
+            <span class="car-stat"><i style="width:${stat(car.driftBar)}"></i>DRIFT</span>
+          </span>
+        </span>
+      </button>`;
+    }).join('');
+  }
+
+  function selectCar(index) {
+    const car = CARS[index];
+    if (!car) return;
+    selectedCarIndex = index;
+    activeCar = car;
+    applyCarLook(car);
+    try { localStorage.setItem(CAR_KEY, String(index)); } catch (e) {}
+    renderGarage();
+  }
+
+  function setGarage(open) {
+    garageOpen = open;
+    garageEl.classList.toggle('open', open);
+    garageEl.setAttribute('aria-hidden', String(!open));
+    for (const key in keys) keys[key] = false;
+    if (open) {
+      renderGarage();
+    } else {
+      initAudio();
+      showToast('WASD drive · SPACE drift · cyan decks = air time', 4200);
+    }
+  }
+
+  carListEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.car-card');
+    if (card) selectCar(Number(card.dataset.index));
+  });
+  garageCloseEl.addEventListener('click', () => setGarage(false));
+  garageEl.addEventListener('click', (e) => {
+    if (e.target === garageEl) setGarage(false);
+  });
 
   function showToast(message, duration = 2400) {
     toastEl.textContent = message;
@@ -1420,11 +1850,98 @@ title: "Forza Horizon 10"
     toastTimer = setTimeout(() => toastEl.classList.remove('on'), duration);
   }
 
+  function trackBest() {
+    if (state.score <= state.best) return;
+    state.best = Math.floor(state.score);
+    const now = performance.now();
+    if (now - bestSaveAt < 2000) return;
+    bestSaveAt = now;
+    try { localStorage.setItem(BEST_KEY, String(state.best)); } catch (e) {}
+  }
+
+  function award(points, label, duration = 1200) {
+    state.score += Math.max(0, Math.round(points));
+    trackBest();
+    if (label) showToast(label, duration);
+  }
+
+  function bumpMultiplier() {
+    state.comboTimer = 2.6;
+    state.comboProgress = 0;
+    if (state.multiplier < 5) state.multiplier++;
+  }
+
+  function breakCombo() {
+    if (state.multiplier > 1) showToast('COMBO LOST', 900);
+    state.multiplier = 1;
+    state.comboTimer = 0;
+    state.comboProgress = 0;
+  }
+
+  function updateStuntScore(dt) {
+    state.nearMissTimer = Math.max(0, state.nearMissTimer - dt);
+    state.comboTimer = Math.max(0, state.comboTimer - dt);
+    if (state.comboTimer === 0 && state.multiplier > 1) {
+      state.multiplier = 1;
+      state.comboProgress = 0;
+    }
+    if (!state.drifting) return;
+    state.score += 34 * state.multiplier * dt;
+    state.comboTimer = 2.4;
+    state.comboProgress += dt;
+    if (state.comboProgress >= 1 && state.multiplier < 5) {
+      state.comboProgress = 0;
+      state.multiplier++;
+    }
+    trackBest();
+  }
+
+  function updateRings(dt) {
+    ringTime += dt;
+    if (ringResetTimer > 0) {
+      ringResetTimer -= dt;
+      if (ringResetTimer <= 0) {
+        for (const ring of rings) ring.group.visible = true;
+        state.rings = 0;
+        showToast('Gold rings respawned', 1300);
+      }
+      return;
+    }
+    for (const ring of rings) {
+      if (!ring.group.visible) continue;
+      ring.spin.rotation.z += dt * .8;
+      const pulse = 1 + Math.sin(ringTime * 3 + ring.phase) * .045;
+      ring.group.scale.setScalar(pulse);
+      const dx = state.pos.x - ring.x;
+      const dz = state.pos.z - ring.z;
+      const dy = (state.y + 1.2) - 3.3;
+      if (dx * dx + dz * dz < 17.6 && Math.abs(dy) < 4.2) {
+        ring.group.visible = false;
+        state.rings++;
+        const points = 500 * state.multiplier;
+        award(points, `RING ${state.rings}/${rings.length} +${points}`, 1100);
+        bumpMultiplier();
+        state.shake = Math.min(1, state.shake + .12);
+        if (state.rings === rings.length) {
+          award(2500, 'CITY CLEARED +2,500', 2200);
+          state.shake = Math.min(1, state.shake + .35);
+          ringResetTimer = 8;
+        }
+        break;
+      }
+    }
+  }
+
   function updateHud() {
     speedEl.textContent = Math.round(state.speedKmh);
     gearEl.textContent = state.gear;
-    rpmEl.style.width = `${Math.min(100, state.speedKmh / 2.1)}%`;
+    rpmEl.style.width = `${Math.min(100, state.speedKmh / (activeCar.top * 3.6) * 100)}%`;
     driftEl.classList.toggle('on', state.drifting);
+    scoreEl.textContent = Math.floor(state.score).toLocaleString('en-US');
+    bestEl.textContent = Math.floor(state.best).toLocaleString('en-US');
+    multEl.textContent = `x${state.multiplier}`;
+    multEl.classList.toggle('hot', state.multiplier > 1);
+    ringsEl.textContent = `RINGS ${state.rings}/${rings.length}`;
   }
 
   function updateFps() {
@@ -1469,6 +1986,22 @@ title: "Forza Horizon 10"
     }
     for (const z of roadZs) {
       mm.beginPath(); mm.moveTo(pad, toY(z)); mm.lineTo(w - pad, toY(z)); mm.stroke();
+    }
+
+    for (const deck of stuntDecks) {
+      mm.fillStyle = 'rgba(82, 229, 255, .16)';
+      mm.strokeStyle = 'rgba(82, 229, 255, .72)';
+      mm.lineWidth = 1.2;
+      mm.fillRect(toX(deck.x - deck.w / 2), toY(deck.z - deck.d / 2), deck.w * scale, deck.d * scale);
+      mm.strokeRect(toX(deck.x - deck.w / 2), toY(deck.z - deck.d / 2), deck.w * scale, deck.d * scale);
+    }
+
+    for (const ring of rings) {
+      if (!ring.group.visible) continue;
+      mm.fillStyle = '#ffd166';
+      mm.beginPath();
+      mm.arc(toX(ring.x), toY(ring.z), 2.3, 0, Math.PI * 2);
+      mm.fill();
     }
 
     for (const car of traffic) {
@@ -1526,16 +2059,21 @@ title: "Forza Horizon 10"
   function animate() {
     requestAnimationFrame(animate);
     const rawDt = Math.min(.2, clock.getDelta());
-    accumulator = Math.min(accumulator + rawDt, .2);
-    let steps = 0;
-    while (accumulator >= FIXED_STEP && steps < 12) {
-      updatePhysics(FIXED_STEP);
-      updateTraffic(FIXED_STEP);
-      updateTrafficLights(FIXED_STEP);
-      accumulator -= FIXED_STEP;
-      steps++;
+    if (garageOpen) {
+      accumulator = 0;
+      updateAudio(0);
+    } else {
+      accumulator = Math.min(accumulator + rawDt, .2);
+      let steps = 0;
+      while (accumulator >= FIXED_STEP && steps < 12) {
+        updatePhysics(FIXED_STEP);
+        updateTraffic(FIXED_STEP);
+        updateTrafficLights(FIXED_STEP);
+        accumulator -= FIXED_STEP;
+        steps++;
+      }
+      updateAudio((keys.KeyW || keys.ArrowUp) ? 1 : 0);
     }
-    updateAudio((keys.KeyW || keys.ArrowUp) ? 1 : 0);
     updateCamera(rawDt);
     updateHud();
     updateCarShadows();
@@ -1553,8 +2091,12 @@ title: "Forza Horizon 10"
   camera.lookAt(SPAWN.x, 1.15, SPAWN.z + 6);
   drawMinimap();
   updateHud();
-  showToast('WASD to drive · SPACE to drift · C camera · M sound', 5200);
+  setGarage(true);
   animate();
 
-  window.__forza = { state, blocks, traffic, camera, renderer, scene };
+  window.__forza = {
+    state, blocks, traffic, camera, renderer, scene, rings, hero, CARS, stuntSurfaces, stuntDecks, surfaceAt, selectCar,
+    get activeCar() { return activeCar; },
+    get garageOpen() { return garageOpen; }
+  };
 </script>
