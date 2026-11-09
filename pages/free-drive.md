@@ -441,26 +441,148 @@ title: "Forza Horizon 10"
     return geo;
   }
 
-  const carBodyGeo = makeCarHullGeometry([
-    { z: -2.26, w: .58, b: .52, t: .86 },
-    { z: -2.08, w: .90, b: .38, t: .98 },
-    { z: -1.58, w: 1.03, b: .32, t: 1.05 },
-    { z: -.55, w: 1.06, b: .32, t: 1.06 },
-    { z: .65, w: 1.04, b: .32, t: 1.02 },
-    { z: 1.62, w: 1.02, b: .34, t: .98 },
-    { z: 2.12, w: .90, b: .40, t: .90 },
-    { z: 2.28, w: .62, b: .50, t: .78 }
-  ], 20);
-  const carCabinGeo = makeCarHullGeometry([
-    { z: -1.34, w: .35, b: .98, t: 1.10 },
-    { z: -1.12, w: .65, b: .99, t: 1.32 },
-    { z: -.72, w: .76, b: .99, t: 1.53 },
-    { z: -.25, w: .76, b: .99, t: 1.56 },
-    { z: .35, w: .70, b: .99, t: 1.52 },
-    { z: .78, w: .58, b: .99, t: 1.32 },
-    { z: 1.04, w: .36, b: .99, t: 1.10 },
-    { z: 1.12, w: .18, b: 1.0, t: 1.04 }
-  ], 18);
+  const CAR_SHAPES = {
+    crimson: {
+      body: [
+        { z: -2.26, w: .58, b: .52, t: .86 },
+        { z: -2.08, w: .90, b: .38, t: .98 },
+        { z: -1.58, w: 1.03, b: .32, t: 1.05 },
+        { z: -.55, w: 1.06, b: .32, t: 1.06 },
+        { z: .65, w: 1.04, b: .32, t: 1.02 },
+        { z: 1.62, w: 1.02, b: .34, t: .98 },
+        { z: 2.12, w: .90, b: .40, t: .90 },
+        { z: 2.28, w: .62, b: .50, t: .78 }
+      ],
+      cabin: [
+        { z: -1.34, w: .35, b: .98, t: 1.10 },
+        { z: -1.12, w: .65, b: .99, t: 1.32 },
+        { z: -.72, w: .76, b: .99, t: 1.53 },
+        { z: -.25, w: .76, b: .99, t: 1.56 },
+        { z: .35, w: .70, b: .99, t: 1.52 },
+        { z: .78, w: .58, b: .99, t: 1.32 },
+        { z: 1.04, w: .36, b: .99, t: 1.10 },
+        { z: 1.12, w: .18, b: 1.0, t: 1.04 }
+      ],
+      roof: { sx: 1.24, sy: .055, sz: 1.42, y: 1.55, z: -.14 },
+      light: { x: .52, y: .8, z: 2.2, sx: .36, sy: .11, sz: .08 }
+    },
+    midnight: {
+      body: [
+        { z: -2.30, w: .62, b: .50, t: .82 },
+        { z: -2.12, w: .96, b: .34, t: .98 },
+        { z: -1.60, w: 1.08, b: .30, t: 1.00 },
+        { z: -.50, w: 1.03, b: .30, t: .95 },
+        { z: .70, w: .98, b: .30, t: .88 },
+        { z: 1.70, w: .94, b: .33, t: .80 },
+        { z: 2.30, w: .64, b: .40, t: .70 }
+      ],
+      cabin: [
+        { z: -1.72, w: .20, b: .90, t: .96 },
+        { z: -1.30, w: .60, b: .94, t: 1.14 },
+        { z: -.80, w: .72, b: .94, t: 1.34 },
+        { z: -.25, w: .73, b: .94, t: 1.38 },
+        { z: .35, w: .62, b: .94, t: 1.24 },
+        { z: .80, w: .40, b: .92, t: 1.06 },
+        { z: 1.00, w: .18, b: .90, t: .98 }
+      ],
+      roof: { sx: 1.08, sy: .045, sz: 1.25, y: 1.40, z: -.50 },
+      light: { x: .54, y: .74, z: 2.22, sx: .32, sy: .09, sz: .07 }
+    },
+    solar: {
+      body: [
+        { z: -2.28, w: .70, b: .46, t: .98 },
+        { z: -2.05, w: 1.08, b: .32, t: 1.06 },
+        { z: -1.40, w: 1.10, b: .30, t: 1.02 },
+        { z: -.30, w: 1.02, b: .28, t: .94 },
+        { z: .80, w: 1.00, b: .29, t: .84 },
+        { z: 1.75, w: .94, b: .32, t: .72 },
+        { z: 2.30, w: .62, b: .38, t: .60 }
+      ],
+      cabin: [
+        { z: -1.25, w: .20, b: .86, t: .98 },
+        { z: -.90, w: .55, b: .88, t: 1.20 },
+        { z: -.45, w: .72, b: .88, t: 1.36 },
+        { z: .10, w: .72, b: .88, t: 1.38 },
+        { z: .60, w: .58, b: .86, t: 1.22 },
+        { z: .95, w: .32, b: .84, t: 1.00 },
+        { z: 1.10, w: .15, b: .83, t: .93 }
+      ],
+      roof: { sx: 1.12, sy: .04, sz: 1.05, y: 1.34, z: -.30 },
+      light: { x: .52, y: .66, z: 2.2, sx: .34, sy: .09, sz: .06 }
+    },
+    mint: {
+      body: [
+        { z: -2.00, w: .64, b: .50, t: .94 },
+        { z: -1.90, w: .96, b: .34, t: 1.08 },
+        { z: -1.20, w: 1.02, b: .32, t: 1.10 },
+        { z: 0, w: 1.02, b: .32, t: 1.06 },
+        { z: 1.20, w: 1.00, b: .32, t: .98 },
+        { z: 1.75, w: .94, b: .36, t: .86 },
+        { z: 1.98, w: .68, b: .44, t: .74 }
+      ],
+      cabin: [
+        { z: -1.82, w: .18, b: .98, t: 1.05 },
+        { z: -1.60, w: .60, b: .98, t: 1.45 },
+        { z: -1.15, w: .78, b: .98, t: 1.62 },
+        { z: -.45, w: .80, b: .98, t: 1.65 },
+        { z: .20, w: .76, b: .98, t: 1.60 },
+        { z: .65, w: .58, b: .98, t: 1.36 },
+        { z: .90, w: .28, b: .98, t: 1.10 }
+      ],
+      roof: { sx: 1.28, sy: .055, sz: 1.45, y: 1.64, z: -.55 },
+      light: { x: .54, y: .76, z: 2.02, sx: .34, sy: .1, sz: .07 }
+    },
+    gt3rs: {
+      body: [
+        { z: -2.30, w: .72, b: .48, t: .90 },
+        { z: -2.08, w: 1.08, b: .34, t: 1.04 },
+        { z: -1.50, w: 1.06, b: .32, t: 1.06 },
+        { z: -.50, w: 1.02, b: .32, t: 1.02 },
+        { z: .50, w: .96, b: .32, t: .96 },
+        { z: 1.35, w: .98, b: .34, t: .90 },
+        { z: 1.95, w: .86, b: .38, t: .80 },
+        { z: 2.28, w: .62, b: .46, t: .80 }
+      ],
+      cabin: [
+        { z: -1.62, w: .22, b: .98, t: 1.04 },
+        { z: -1.35, w: .55, b: .99, t: 1.10 },
+        { z: -.90, w: .70, b: .99, t: 1.30 },
+        { z: -.40, w: .76, b: .99, t: 1.47 },
+        { z: .05, w: .74, b: .99, t: 1.52 },
+        { z: .50, w: .63, b: .99, t: 1.40 },
+        { z: .82, w: .44, b: .99, t: 1.18 },
+        { z: 1.00, w: .20, b: 1.0, t: 1.04 }
+      ],
+      roof: { sx: 1.18, sy: .05, sz: 1.30, y: 1.55, z: -.40 },
+      light: { x: .60, y: .78, z: 2.21, sx: .18, sy: .14, sz: .09 }
+    }
+  };
+
+  function makeRoofGeometry(def) {
+    return makeCarHullGeometry(def.cabin.map((s) => ({
+      z: s.z,
+      w: s.w * .82,
+      b: s.t - .03,
+      t: s.t + .012
+    })), 12);
+  }
+
+  const carShapeCache = new Map();
+  function getCarShape(id) {
+    let shape = carShapeCache.get(id);
+    if (!shape) {
+      const def = CAR_SHAPES[id] || CAR_SHAPES.crimson;
+      shape = {
+        body: makeCarHullGeometry(def.body, 20),
+        cabin: makeCarHullGeometry(def.cabin, 18),
+        roof: makeRoofGeometry(def),
+        def
+      };
+      carShapeCache.set(id, shape);
+    }
+    return shape;
+  }
+  const defaultCarShape = getCarShape('crimson');
   const roundedGeo = makeRoundedBoxGeometry(1, 1, 1, .2);
 
   const asphaltMat = new THREE.MeshStandardMaterial({ map: asphaltTex, color: 0xffffff, roughness: .96, metalness: .02 });
@@ -873,23 +995,26 @@ title: "Forza Horizon 10"
       ? new THREE.MeshPhysicalMaterial({ color, metalness: .5, roughness: .24, clearcoat: 1, clearcoatRoughness: .16 })
       : paint(color);
 
-    const lower = new THREE.Mesh(carBodyGeo, bodyMat);
+    const lower = new THREE.Mesh(defaultCarShape.body, bodyMat);
     lower.castShadow = true;
     lower.receiveShadow = true;
     body.add(lower);
 
-    const cabin = new THREE.Mesh(carCabinGeo, glassMat);
+    const cabin = new THREE.Mesh(defaultCarShape.cabin, glassMat);
     cabin.castShadow = true;
     body.add(cabin);
 
-    const roof = new THREE.Mesh(roundedGeo, bodyMat);
-    roof.scale.set(1.24, .055, 1.42);
-    roof.position.set(0, 1.55, -.14);
+    const roof = new THREE.Mesh(defaultCarShape.roof, bodyMat);
     roof.castShadow = true;
     body.add(roof);
 
+    let grille = null;
+    let plate = null;
+    let splitter = null;
+    let diffuser = null;
+    const exhausts = [];
     if (hero) {
-      const grille = new THREE.Mesh(roundedGeo, signalMat);
+      grille = new THREE.Mesh(roundedGeo, signalMat);
       grille.scale.set(.72, .13, .06);
       grille.position.set(0, .56, 2.235);
       body.add(grille);
@@ -910,6 +1035,18 @@ title: "Forza Horizon 10"
       bar.position.set(0, .8, 2.2);
       body.add(bar);
       headLights.push(bar);
+    }
+
+    const roundHeadlights = [];
+    if (hero) {
+      for (const x of [-.6, .6]) {
+        const light = new THREE.Mesh(sphereGeo, headMat);
+        light.scale.set(.18, .14, .09);
+        light.position.set(x, .78, 2.21);
+        light.visible = false;
+        body.add(light);
+        roundHeadlights.push(light);
+      }
     }
 
     const brakeMat = hero
@@ -933,19 +1070,20 @@ title: "Forza Horizon 10"
     }
 
     let spoiler = null;
+    let gt3Details = null;
     const wingEndplates = [];
     if (hero) {
-      const plate = new THREE.Mesh(roundedGeo, plateMat);
+      plate = new THREE.Mesh(roundedGeo, plateMat);
       plate.scale.set(.54, .15, .035);
       plate.position.set(0, .57, -2.275);
       body.add(plate);
 
-      const splitter = new THREE.Mesh(roundedGeo, signalMat);
+      splitter = new THREE.Mesh(roundedGeo, signalMat);
       splitter.scale.set(1.94, .06, .46);
       splitter.position.set(0, .3, 2.06);
       body.add(splitter);
 
-      const diffuser = new THREE.Mesh(roundedGeo, signalMat);
+      diffuser = new THREE.Mesh(roundedGeo, signalMat);
       diffuser.scale.set(1.72, .1, .38);
       diffuser.position.set(0, .3, -2.03);
       body.add(diffuser);
@@ -964,6 +1102,20 @@ title: "Forza Horizon 10"
         wingEndplates.push(endplate);
       }
 
+      gt3Details = new THREE.Group();
+      gt3Details.visible = false;
+      const rearVent = new THREE.Mesh(roundedGeo, signalMat);
+      rearVent.scale.set(1.15, .035, .55);
+      rearVent.position.set(0, 1.055, -1.55);
+      gt3Details.add(rearVent);
+      for (const x of [-.84, .84]) {
+        const sideVent = new THREE.Mesh(roundedGeo, signalMat);
+        sideVent.scale.set(.055, .18, .5);
+        sideVent.position.set(x, .82, -1.18);
+        gt3Details.add(sideVent);
+      }
+      body.add(gt3Details);
+
       const thirdBrake = new THREE.Mesh(roundedGeo, brakeMat);
       thirdBrake.scale.set(.58, .04, .05);
       thirdBrake.position.set(0, 1.252, -2.05);
@@ -975,6 +1127,7 @@ title: "Forza Horizon 10"
         pipe.rotation.x = Math.PI / 2;
         pipe.position.set(x, .36, -2.36);
         body.add(pipe);
+        exhausts.push(pipe);
       }
       for (const x of [-.65, .65]) {
         const strut = new THREE.Mesh(roundedGeo, signalMat);
@@ -1008,7 +1161,7 @@ title: "Forza Horizon 10"
       if (z > 0) frontPivots.push(pivot);
     }
 
-    root.userData = { body, wheels, frontPivots, brakeMat, rearLights, headLights, bodyMat, spoiler, wingEndplates };
+    root.userData = { body, lower, cabin, roof, wheels, frontPivots, brakeMat, rearLights, headLights, roundHeadlights, gt3Details, grille, plate, splitter, diffuser, exhausts, bodyMat, spoiler, wingEndplates };
     return root;
   }
 
@@ -1041,6 +1194,34 @@ title: "Forza Horizon 10"
   let activeCar = CARS[selectedCarIndex];
 
   function applyCarLook(car) {
+    const shape = getCarShape(car.id);
+    const def = shape.def;
+    const first = def.body[0];
+    const last = def.body[def.body.length - 1];
+    hero.userData.lower.geometry = shape.body;
+    hero.userData.cabin.geometry = shape.cabin;
+    hero.userData.roof.geometry = shape.roof;
+    hero.userData.grille.position.set(0, last.b + (last.t - last.b) * .35, last.z - .01);
+    hero.userData.grille.scale.set(last.w * 1.12, .13, .06);
+    hero.userData.plate.position.z = first.z - .01;
+    hero.userData.splitter.position.z = last.z + .02;
+    hero.userData.diffuser.position.z = first.z + .08;
+    for (const pipe of hero.userData.exhausts) pipe.position.z = first.z - .08;
+    const rearX = Math.min(.52, first.w * .74);
+    hero.userData.rearLights.forEach((mesh, index) => {
+      mesh.position.set((index === 0 ? -1 : 1) * rearX, .8, first.z + .07);
+    });
+    const light = def.light;
+    hero.userData.headLights.forEach((mesh, index) => {
+      mesh.position.set((index === 0 ? -1 : 1) * light.x, light.y, light.z);
+      mesh.scale.set(light.sx, light.sy, light.sz);
+      mesh.visible = car.id !== 'gt3rs';
+    });
+    hero.userData.roundHeadlights.forEach((mesh, index) => {
+      mesh.position.set((index === 0 ? -1 : 1) * light.x, light.y, light.z);
+      mesh.visible = car.id === 'gt3rs';
+    });
+    if (hero.userData.gt3Details) hero.userData.gt3Details.visible = car.id === 'gt3rs';
     hero.userData.bodyMat.color.setHex(car.color);
     const gt3 = car.id === 'gt3rs';
     if (hero.userData.spoiler) {
