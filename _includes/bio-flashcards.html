@@ -1,0 +1,603 @@
+<style>
+  #bio-flashcards {
+    --bf-accent: #2f855a;
+    --bf-line: rgba(127, 127, 127, 0.45);
+    --bf-tint: rgba(127, 127, 127, 0.08);
+    --bf-wrong: #b42318;
+    margin: 1.5rem 0 2.25rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    #bio-flashcards {
+      --bf-wrong: #ff9b91;
+    }
+  }
+
+  #bio-flashcards [hidden] {
+    display: none !important;
+  }
+
+  #bio-flashcards .BioFlash-modes {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--bf-line);
+    border-radius: 999px;
+  }
+
+  #bio-flashcards .BioFlash-mode {
+    padding: 0.35rem 0.85rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  #bio-flashcards .BioFlash-mode[aria-pressed="true"] {
+    background: var(--bf-accent);
+    color: #fff;
+  }
+
+  #bio-flashcards .BioFlash-lead {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    opacity: 0.85;
+  }
+
+  #bio-flashcards .BioFlash-card {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 14px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  #bio-flashcards .BioFlash-stage {
+    display: grid;
+    min-height: 10.5rem;
+  }
+
+  #bio-flashcards .BioFlash-face {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 1.15rem 1.35rem;
+    border: 1.5px solid var(--bf-line);
+    border-radius: 14px;
+    background: var(--bf-tint);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  #bio-flashcards .BioFlash-back {
+    border-color: var(--bf-accent);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+  }
+
+  #bio-flashcards .BioFlash-card[aria-pressed="true"] .BioFlash-front {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+  }
+
+  #bio-flashcards .BioFlash-card[aria-pressed="true"] .BioFlash-back {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  #bio-flashcards .BioFlash-kicker {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.65;
+  }
+
+  #bio-flashcards .BioFlash-term {
+    font-size: clamp(1.45rem, 4vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  #bio-flashcards .BioFlash-def {
+    font-size: 1.02rem;
+    line-height: 1.55;
+  }
+
+  #bio-flashcards .BioFlash-hint {
+    margin-top: 0.35rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  #bio-flashcards .BioFlash-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    opacity: 0.85;
+  }
+
+  #bio-flashcards .BioFlash-bar {
+    height: 6px;
+    margin-top: 0.4rem;
+    border-radius: 999px;
+    background: var(--bf-tint);
+    overflow: hidden;
+  }
+
+  #bio-flashcards .BioFlash-bar i {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--bf-accent);
+    transition: width 0.3s ease;
+  }
+
+  #bio-flashcards .BioFlash-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  #bio-flashcards .BioFlash-btn {
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--bf-line);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  #bio-flashcards .BioFlash-btn:hover {
+    border-color: var(--bf-accent);
+  }
+
+  #bio-flashcards .BioFlash-btn--primary,
+  #bio-flashcards .BioFlash-btn--known[aria-pressed="true"] {
+    border-color: var(--bf-accent);
+    background: var(--bf-accent);
+    color: #fff;
+  }
+
+  #bio-flashcards .BioFlash-card:focus-visible,
+  #bio-flashcards .BioFlash-btn:focus-visible,
+  #bio-flashcards .BioFlash-mode:focus-visible,
+  #bio-flashcards .BioFlash-option:focus-visible {
+    outline: 3px solid var(--bf-accent);
+    outline-offset: 3px;
+  }
+
+  #bio-flashcards .BioFlash-nav .BioFlash-btn:last-child {
+    margin-left: auto;
+  }
+
+  #bio-flashcards .BioFlash-quiz-term {
+    margin: 0.9rem 0 0.25rem;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  #bio-flashcards .BioFlash-options {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+  }
+
+  #bio-flashcards .BioFlash-option {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1.5px solid var(--bf-line);
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  #bio-flashcards .BioFlash-option:hover {
+    border-color: var(--bf-accent);
+  }
+
+  #bio-flashcards .BioFlash-option[aria-disabled="true"],
+  #bio-flashcards .BioFlash-option[aria-disabled="true"]:hover {
+    border-color: var(--bf-line);
+    cursor: default;
+  }
+
+  #bio-flashcards .BioFlash-option.is-correct {
+    border-color: var(--bf-accent);
+    box-shadow: inset 0 0 0 1.5px var(--bf-accent);
+  }
+
+  #bio-flashcards .BioFlash-option.is-wrong {
+    border-color: var(--bf-wrong);
+    box-shadow: inset 0 0 0 1.5px var(--bf-wrong);
+  }
+
+  #bio-flashcards .BioFlash-feedback {
+    min-height: 1.4em;
+    margin: 0.85rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  #bio-flashcards .BioFlash-feedback.is-correct {
+    color: var(--bf-accent);
+  }
+
+  #bio-flashcards .BioFlash-feedback.is-wrong {
+    color: var(--bf-wrong);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #bio-flashcards .BioFlash-face,
+    #bio-flashcards .BioFlash-bar i {
+      transition: none;
+    }
+  }
+</style>
+
+<div class="BioFlash" id="bio-flashcards">
+  <div class="BioFlash-modes" role="group" aria-label="Study mode">
+    <button class="BioFlash-mode" id="bio-mode-cards" type="button" aria-pressed="true">Flashcards</button>
+    <button class="BioFlash-mode" id="bio-mode-quiz" type="button" aria-pressed="false">Quiz</button>
+  </div>
+
+  <div id="bio-cards-panel">
+    <p class="BioFlash-lead">Tap a card to flip it. Mark it known once you can explain the term without looking — known cards are remembered on this device.</p>
+
+    <button class="BioFlash-card" id="bio-card" type="button" aria-pressed="false">
+      <span class="BioFlash-stage">
+        <span class="BioFlash-face BioFlash-front">
+          <span class="BioFlash-kicker">Term</span>
+          <span class="BioFlash-term" id="bio-term">ATP</span>
+          <span class="BioFlash-hint">Tap to flip</span>
+        </span>
+        <span class="BioFlash-face BioFlash-back">
+          <span class="BioFlash-kicker">Meaning</span>
+          <span class="BioFlash-def" id="bio-def">Adenosine triphosphate, the cell’s energy currency: energy is stored in its phosphate bonds and released when the last phosphate breaks off.</span>
+        </span>
+      </span>
+    </button>
+
+    <div class="BioFlash-status" role="status" aria-live="polite">
+      <span id="bio-count">Card 1 of 17</span>
+      <span id="bio-known">0 of 17 known</span>
+    </div>
+
+    <div class="BioFlash-bar" aria-hidden="true"><i id="bio-bar"></i></div>
+
+    <div class="BioFlash-controls BioFlash-nav">
+      <button class="BioFlash-btn" id="bio-prev" type="button">← Prev</button>
+      <button class="BioFlash-btn BioFlash-btn--primary" id="bio-flip" type="button">Show answer</button>
+      <button class="BioFlash-btn" id="bio-next" type="button">Next →</button>
+    </div>
+
+    <div class="BioFlash-controls">
+      <button class="BioFlash-btn BioFlash-btn--known" id="bio-mark" type="button" aria-pressed="false">Mark as known</button>
+      <button class="BioFlash-btn" id="bio-shuffle" type="button" aria-pressed="false">Shuffle</button>
+    </div>
+  </div>
+
+  <div id="bio-quiz-panel" hidden>
+    <p class="BioFlash-lead">Pick the meaning that matches each term. You get one point for each correct answer.</p>
+
+    <div class="BioFlash-status" role="status" aria-live="polite">
+      <span id="bio-quiz-progress">Question 1 of 17</span>
+      <span id="bio-quiz-score">0 of 0 correct</span>
+    </div>
+
+    <p class="BioFlash-quiz-term" id="bio-quiz-term"></p>
+    <div class="BioFlash-options" id="bio-quiz-options"></div>
+    <p class="BioFlash-feedback" id="bio-quiz-feedback" role="status" aria-live="polite"></p>
+
+    <div class="BioFlash-controls">
+      <button class="BioFlash-btn BioFlash-btn--primary" id="bio-quiz-next" type="button" hidden>Next question</button>
+      <button class="BioFlash-btn" id="bio-quiz-reset" type="button">Reset quiz</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var cards = [
+      { term: "ATP", def: "Adenosine triphosphate, the cell’s energy currency: energy is stored in its phosphate bonds and released when the last phosphate breaks off." },
+      { term: "ADP", def: "Adenosine diphosphate, what is left after ATP releases a phosphate. It can be recharged back into ATP." },
+      { term: "Cellular respiration", def: "The process cells use to break down glucose and release the energy as ATP." },
+      { term: "Aerobic respiration", def: "Cellular respiration that uses oxygen. It releases much more ATP than anaerobic respiration." },
+      { term: "Anaerobic respiration", def: "Cellular respiration that happens without oxygen. It releases little ATP and produces fermentation products." },
+      { term: "Glycolysis", def: "The first step of cellular respiration, where glucose is split into two pyruvate molecules in the cytoplasm." },
+      { term: "Krebs cycle", def: "A cycle of reactions in the mitochondrion that releases energy from pyruvate and gives off carbon dioxide. Also called the citric acid cycle." },
+      { term: "Electron transport chain (ETC)", def: "Proteins in the inner mitochondrial membrane that pass electrons along, pump protons, and make most of the cell’s ATP." },
+      { term: "Photosynthesis", def: "The process plants use to store light energy in glucose, using carbon dioxide and water and releasing oxygen." },
+      { term: "Fermentation", def: "An anaerobic pathway that regenerates NAD+ so glycolysis can continue. It makes lactic acid or alcohol and carbon dioxide." },
+      { term: "Lactic acid fermentation", def: "Fermentation that turns pyruvate into lactic acid. It happens in muscle cells during hard exercise." },
+      { term: "Alcoholic fermentation", def: "Fermentation that turns pyruvate into alcohol and carbon dioxide. Yeast does this in bread dough." },
+      { term: "Mitochondrion", def: "The organelle where aerobic respiration, the Krebs cycle, and the electron transport chain take place." },
+      { term: "Chloroplast", def: "The plant organelle where photosynthesis happens. It contains chlorophyll, which absorbs light." },
+      { term: "Glucose", def: "A simple sugar, C6H12O6, that cells break down to get energy." },
+      { term: "Pyruvate", def: "The three-carbon molecule made by glycolysis that enters the Krebs cycle when oxygen is available." },
+      { term: "Oxygen", def: "The final electron acceptor in the electron transport chain. Without it, aerobic respiration stops." }
+    ];
+
+    var root = document.getElementById("bio-flashcards");
+    if (!root) return;
+
+    var cardEl = document.getElementById("bio-card");
+    var termEl = document.getElementById("bio-term");
+    var defEl = document.getElementById("bio-def");
+    var countEl = document.getElementById("bio-count");
+    var knownEl = document.getElementById("bio-known");
+    var barEl = document.getElementById("bio-bar");
+    var flipEl = document.getElementById("bio-flip");
+    var prevEl = document.getElementById("bio-prev");
+    var nextEl = document.getElementById("bio-next");
+    var markEl = document.getElementById("bio-mark");
+    var shuffleEl = document.getElementById("bio-shuffle");
+
+    var modeCardsEl = document.getElementById("bio-mode-cards");
+    var modeQuizEl = document.getElementById("bio-mode-quiz");
+    var cardsPanel = document.getElementById("bio-cards-panel");
+    var quizPanel = document.getElementById("bio-quiz-panel");
+    var quizTermEl = document.getElementById("bio-quiz-term");
+    var quizOptionsEl = document.getElementById("bio-quiz-options");
+    var quizFeedbackEl = document.getElementById("bio-quiz-feedback");
+    var quizProgressEl = document.getElementById("bio-quiz-progress");
+    var quizScoreEl = document.getElementById("bio-quiz-score");
+    var quizNextEl = document.getElementById("bio-quiz-next");
+    var quizResetEl = document.getElementById("bio-quiz-reset");
+
+    var STORE = "bio-ch4-flashcards";
+    var order = cards.map(function (_, i) { return i; });
+    var index = 0;
+    var flipped = false;
+    var shuffled = false;
+    var known = {};
+
+    var quizOrder = [];
+    var quizPos = 0;
+    var quizCorrect = 0;
+    var quizAnswered = 0;
+    var quizQuestionDone = false;
+    var quizStarted = false;
+    var quizFinished = false;
+
+    try {
+      var saved = JSON.parse(window.localStorage.getItem(STORE) || "{}");
+      if (saved && saved.known) {
+        saved.known.forEach(function (term) { known[term] = true; });
+      }
+    } catch (error) {
+      known = {};
+    }
+
+    function shuffle(list) {
+      var copy = list.slice();
+      for (var i = copy.length - 1; i > 0; i -= 1) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var swap = copy[i];
+        copy[i] = copy[j];
+        copy[j] = swap;
+      }
+      return copy;
+    }
+
+    function knownTerms() {
+      return Object.keys(known).filter(function (term) { return known[term]; });
+    }
+
+    function saveKnown() {
+      try {
+        window.localStorage.setItem(STORE, JSON.stringify({ known: knownTerms() }));
+      } catch (error) {
+        /* storage can be blocked; the deck still works */
+      }
+    }
+
+    function current() {
+      return cards[order[index]];
+    }
+
+    function render() {
+      var item = current();
+      var total = knownTerms().length;
+      var isKnown = !!known[item.term];
+
+      termEl.textContent = item.term;
+      defEl.textContent = item.def;
+      cardEl.setAttribute("aria-pressed", flipped ? "true" : "false");
+      flipEl.textContent = flipped ? "Show term" : "Show answer";
+      countEl.textContent = "Card " + (index + 1) + " of " + order.length;
+      knownEl.textContent = total + " of " + cards.length + " known";
+      barEl.style.width = (total / cards.length * 100) + "%";
+      markEl.setAttribute("aria-pressed", isKnown ? "true" : "false");
+      markEl.textContent = isKnown ? "Known ✓" : "Mark as known";
+      shuffleEl.setAttribute("aria-pressed", shuffled ? "true" : "false");
+      shuffleEl.textContent = shuffled ? "In order" : "Shuffle";
+    }
+
+    function go(step) {
+      index = (index + step + order.length) % order.length;
+      flipped = false;
+      render();
+    }
+
+    cardEl.addEventListener("click", function () {
+      flipped = !flipped;
+      render();
+    });
+
+    flipEl.addEventListener("click", function () {
+      flipped = !flipped;
+      render();
+    });
+
+    prevEl.addEventListener("click", function () { go(-1); });
+    nextEl.addEventListener("click", function () { go(1); });
+
+    markEl.addEventListener("click", function () {
+      var term = current().term;
+      known[term] = !known[term];
+      saveKnown();
+      render();
+    });
+
+    shuffleEl.addEventListener("click", function () {
+      if (shuffled) {
+        order = cards.map(function (_, i) { return i; });
+        shuffled = false;
+      } else {
+        order = shuffle(order);
+        shuffled = true;
+      }
+      index = 0;
+      flipped = false;
+      render();
+    });
+
+    root.addEventListener("keydown", function (event) {
+      if (quizPanel.hidden) {
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          go(1);
+        } else if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          go(-1);
+        }
+      }
+    });
+
+    function startQuiz() {
+      quizOrder = shuffle(cards.map(function (_, i) { return i; }));
+      quizPos = 0;
+      quizCorrect = 0;
+      quizAnswered = 0;
+      quizQuestionDone = false;
+      quizFinished = false;
+      quizStarted = true;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      var item = cards[quizOrder[quizPos]];
+      var choices = [item.def];
+
+      quizQuestionDone = false;
+      quizFeedbackEl.textContent = "";
+      quizFeedbackEl.className = "BioFlash-feedback";
+      quizNextEl.hidden = true;
+      quizOptionsEl.innerHTML = "";
+      quizTermEl.textContent = item.term;
+      quizProgressEl.textContent = "Question " + (quizPos + 1) + " of " + quizOrder.length;
+      quizScoreEl.textContent = quizCorrect + " of " + quizAnswered + " correct";
+
+      shuffle(cards.filter(function (card) { return card.term !== item.term; }))
+        .slice(0, 3)
+        .forEach(function (card) { choices.push(card.def); });
+
+      shuffle(choices).forEach(function (definition) {
+        var option = document.createElement("button");
+        option.type = "button";
+        option.className = "BioFlash-option";
+        option.textContent = definition;
+        option.addEventListener("click", function () {
+          answerQuestion(option, definition === item.def, item);
+        });
+        quizOptionsEl.appendChild(option);
+      });
+    }
+
+    function answerQuestion(option, isCorrect, item) {
+      if (quizQuestionDone) return;
+
+      quizQuestionDone = true;
+      quizAnswered += 1;
+      if (isCorrect) quizCorrect += 1;
+
+      var options = quizOptionsEl.querySelectorAll(".BioFlash-option");
+      for (var i = 0; i < options.length; i += 1) {
+        options[i].setAttribute("aria-disabled", "true");
+        if (options[i].textContent === item.def) {
+          options[i].classList.add("is-correct");
+        }
+      }
+      if (!isCorrect) {
+        option.classList.add("is-wrong");
+      }
+
+      quizFeedbackEl.textContent = isCorrect
+        ? "Correct."
+        : "Not quite. The highlighted meaning is the right one.";
+      quizFeedbackEl.className = "BioFlash-feedback " + (isCorrect ? "is-correct" : "is-wrong");
+      quizScoreEl.textContent = quizCorrect + " of " + quizAnswered + " correct";
+      quizNextEl.textContent = quizPos === quizOrder.length - 1 ? "See results" : "Next question";
+      quizNextEl.hidden = false;
+    }
+
+    function nextQuestion() {
+      if (!quizQuestionDone) return;
+      if (quizPos === quizOrder.length - 1) {
+        finishQuiz();
+        return;
+      }
+      quizPos += 1;
+      renderQuestion();
+    }
+
+    function finishQuiz() {
+      quizFinished = true;
+      quizQuestionDone = false;
+      quizTermEl.textContent = "Round complete";
+      quizOptionsEl.innerHTML = "";
+      quizProgressEl.textContent = quizOrder.length + " of " + quizOrder.length + " answered";
+      quizScoreEl.textContent = quizCorrect + " of " + quizOrder.length + " correct";
+      quizFeedbackEl.textContent = "You scored " + quizCorrect + " of " + quizOrder.length + ". Press Reset quiz to try again, or switch back to the cards.";
+      quizFeedbackEl.className = "BioFlash-feedback";
+      quizNextEl.hidden = true;
+    }
+
+    quizNextEl.addEventListener("click", nextQuestion);
+    quizResetEl.addEventListener("click", startQuiz);
+
+    function setMode(mode) {
+      var isQuiz = mode === "quiz";
+      cardsPanel.hidden = isQuiz;
+      quizPanel.hidden = !isQuiz;
+      modeCardsEl.setAttribute("aria-pressed", isQuiz ? "false" : "true");
+      modeQuizEl.setAttribute("aria-pressed", isQuiz ? "true" : "false");
+      if (isQuiz && !quizStarted) {
+        startQuiz();
+      }
+    }
+
+    modeCardsEl.addEventListener("click", function () { setMode("cards"); });
+    modeQuizEl.addEventListener("click", function () { setMode("quiz"); });
+
+    render();
+  })();
+</script>
