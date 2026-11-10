@@ -225,7 +225,7 @@ studying runs Tuesday through Friday morning, about 2 hours 40 minutes in total.
     <ul class="StudyCal-tasks">
       <li><a href="#atp"><strong>15 min — ATP:</strong> what it does, ATP vs. ADP + P, how it transfers energy, where the energy is stored <em>(ATP notes)</em></a></li>
       <li><a href="#photosynthesis"><strong>15 min — Photosynthesis big picture:</strong> autotroph vs. heterotroph, inputs and outputs, the equation, pigment names and colors <em>(notes, handout 4-3)</em></a></li>
-      <li><a href="#photosynthesis"><strong>15 min — Chloroplast:</strong> label it from memory, then check <em>(class drawing)</em></a></li>
+      <li><a href="#labeling"><strong>15 min — Chloroplast:</strong> label it from memory, then drag the parts into place to check <em>(practice below)</em></a></li>
     </ul>
   </li>
   <li class="StudyCal-day">
@@ -257,7 +257,7 @@ studying runs Tuesday through Friday morning, about 2 hours 40 minutes in total.
 </ol>
 
 Short on time? Do one 15-minute block: a flashcard pass, then one diagram from
-memory (chloroplast or mitochondria).
+memory, then check it in the [labeling practice](#labeling).
 
 ## Study guide for Friday, November 13
 
@@ -416,6 +416,14 @@ use 32; use the number your teacher gives.
   electron transport chain.
 - Yeast lab: yeast plus sugar in warm water gives off CO2 bubbles (and ethanol),
   which is evidence of alcoholic fermentation.
+
+## Label the diagrams {#labeling}
+
+Test yourself the way the test asks: drag each word onto the right blank in the
+chloroplast and the mitochondrion. On a phone, tap a word and then tap its
+blank. Press **Check labels** on a filled diagram to see what is right.
+
+{% include bio-labeling.html %}
 
 ## Chapter 4 vocabulary {#vocabulary}
 

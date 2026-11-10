@@ -1,0 +1,465 @@
+<style>
+  #bio-labeling {
+    --bl-accent: #2f855a;
+    --bl-structure: #2f855a;
+    --bl-wash: rgba(47, 133, 90, 0.1);
+    --bl-line: rgba(127, 127, 127, 0.45);
+    --bl-tint: rgba(127, 127, 127, 0.07);
+    --bl-wrong: #b42318;
+    --bl-bg: rgba(255, 255, 255, 0.94);
+    margin: 1.5rem 0 1rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    #bio-labeling {
+      --bl-structure: #5fce97;
+      --bl-wash: rgba(95, 206, 151, 0.12);
+      --bl-wrong: #ff9b91;
+      --bl-bg: rgba(24, 26, 27, 0.94);
+    }
+  }
+
+  #bio-labeling [hidden] {
+    display: none !important;
+  }
+
+  #bio-labeling .BioLabel-lead {
+    margin: 0 0 1.25rem;
+    font-size: 0.95rem;
+    opacity: 0.85;
+  }
+
+  #bio-labeling .BioLabel-figure {
+    margin: 0 0 2.25rem;
+  }
+
+  #bio-labeling .BioLabel-title {
+    margin: 0 0 0.6rem;
+    font-size: 1.05rem;
+  }
+
+  #bio-labeling .BioLabel-stage {
+    padding: 0.75rem;
+    border: 1px solid var(--bl-line);
+    border-radius: 14px;
+    background: var(--bl-tint);
+  }
+
+  #bio-labeling .BioLabel-scroll {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  #bio-labeling .BioLabel-canvas {
+    position: relative;
+    min-width: 560px;
+    max-width: 660px;
+    margin: 0 auto;
+  }
+
+  #bio-labeling .BioLabel-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  #bio-labeling .BioLabel-slot {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.4rem;
+    border: 2px dashed var(--bl-line);
+    border-radius: 999px;
+    background: var(--bl-bg);
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+  }
+
+  #bio-labeling .BioLabel-slot:hover {
+    border-color: var(--bl-accent);
+  }
+
+  #bio-labeling .BioLabel-slot.is-filled {
+    padding: 0 0.6rem;
+    border-style: solid;
+    border-color: var(--bl-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  #bio-labeling .BioLabel-slot.is-correct {
+    border-color: var(--bl-accent);
+    background: rgba(47, 133, 90, 0.18);
+  }
+
+  #bio-labeling .BioLabel-slot.is-wrong {
+    border-color: var(--bl-wrong);
+    background: rgba(180, 35, 24, 0.12);
+  }
+
+  #bio-labeling .BioLabel-slot.is-over {
+    box-shadow: 0 0 0 3px rgba(47, 133, 90, 0.25);
+  }
+
+  #bio-labeling .BioLabel-bank {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-top: 0.9rem;
+  }
+
+  #bio-labeling .BioLabel-chip {
+    padding: 0.45rem 0.85rem;
+    border: 1.5px solid var(--bl-line);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.88rem;
+    cursor: grab;
+    touch-action: manipulation;
+  }
+
+  #bio-labeling .BioLabel-chip:hover {
+    border-color: var(--bl-accent);
+  }
+
+  #bio-labeling .BioLabel-chip[aria-pressed="true"] {
+    border-color: var(--bl-accent);
+    background: rgba(47, 133, 90, 0.14);
+    box-shadow: 0 0 0 2px rgba(47, 133, 90, 0.18);
+  }
+
+  #bio-labeling .BioLabel-chip.is-dragging {
+    opacity: 0.5;
+  }
+
+  #bio-labeling .BioLabel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+  }
+
+  #bio-labeling .BioLabel-btn {
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--bl-line);
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  #bio-labeling .BioLabel-btn:hover {
+    border-color: var(--bl-accent);
+  }
+
+  #bio-labeling .BioLabel-btn--primary {
+    border-color: var(--bl-accent);
+    background: var(--bl-accent);
+    color: #fff;
+  }
+
+  #bio-labeling .BioLabel-status {
+    flex: 1 1 14rem;
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  #bio-labeling .BioLabel-slot:focus-visible,
+  #bio-labeling .BioLabel-chip:focus-visible,
+  #bio-labeling .BioLabel-btn:focus-visible {
+    outline: 3px solid var(--bl-accent);
+    outline-offset: 3px;
+  }
+</style>
+
+<div id="bio-labeling">
+  <p class="BioLabel-lead">Drag each word onto its blank in the picture — or tap a word and then tap a blank. Tap a filled blank to put the word back. Check labels when a diagram is full.</p>
+
+  <section class="BioLabel-figure" data-name="the chloroplast" aria-labelledby="bio-chloro-heading">
+    <h3 class="BioLabel-title" id="bio-chloro-heading">Chloroplast</h3>
+
+    <div class="BioLabel-stage">
+      <div class="BioLabel-scroll">
+        <div class="BioLabel-canvas">
+          <svg class="BioLabel-svg" viewBox="0 0 640 360" role="img" aria-labelledby="bio-chloro-title">
+            <title id="bio-chloro-title">Chloroplast cross-section with five numbered blanks</title>
+            <ellipse cx="320" cy="180" rx="286" ry="130" fill="none" stroke="currentColor" stroke-width="4"/>
+            <ellipse cx="320" cy="180" rx="262" ry="110" style="fill: var(--bl-wash)" stroke="currentColor" stroke-width="2.5"/>
+            <g style="fill: var(--bl-structure)">
+              <rect x="150" y="126" width="92" height="12" rx="6"/>
+              <rect x="150" y="142" width="92" height="12" rx="6"/>
+              <rect x="150" y="158" width="92" height="12" rx="6"/>
+              <rect x="150" y="174" width="92" height="12" rx="6"/>
+              <rect x="150" y="190" width="92" height="12" rx="6"/>
+              <rect x="150" y="206" width="92" height="12" rx="6"/>
+              <rect x="392" y="86" width="88" height="12" rx="6"/>
+              <rect x="392" y="102" width="88" height="12" rx="6"/>
+              <rect x="392" y="118" width="88" height="12" rx="6"/>
+              <rect x="392" y="134" width="88" height="12" rx="6"/>
+              <rect x="392" y="150" width="88" height="12" rx="6"/>
+              <rect x="392" y="166" width="88" height="12" rx="6"/>
+              <rect x="292" y="226" width="88" height="12" rx="6"/>
+              <rect x="292" y="242" width="88" height="12" rx="6"/>
+              <rect x="292" y="258" width="88" height="12" rx="6"/>
+              <rect x="292" y="274" width="88" height="12" rx="6"/>
+              <rect x="452" y="246" width="68" height="12" rx="6"/>
+            </g>
+            <path d="M436 178 C 442 206, 446 228, 456 246" fill="none" style="stroke: var(--bl-structure)" stroke-width="4"/>
+          </svg>
+
+          <button class="BioLabel-slot" type="button" data-answer="ch-outer" data-num="1" style="--x: 50%; --y: 14%" aria-label="Blank 1">1</button>
+          <button class="BioLabel-slot" type="button" data-answer="ch-inner" data-num="2" style="--x: 26.5%; --y: 75%" aria-label="Blank 2">2</button>
+          <button class="BioLabel-slot" type="button" data-answer="ch-stroma" data-num="3" style="--x: 15.5%; --y: 46%" aria-label="Blank 3">3</button>
+          <button class="BioLabel-slot" type="button" data-answer="ch-granum" data-num="4" style="--x: 68%; --y: 22%" aria-label="Blank 4">4</button>
+          <button class="BioLabel-slot" type="button" data-answer="ch-thylakoid" data-num="5" style="--x: 75%; --y: 70%" aria-label="Blank 5">5</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="BioLabel-bank" role="group" aria-label="Chloroplast words">
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="ch-thylakoid">Thylakoid</button>
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="ch-outer">Outer membrane</button>
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="ch-granum">Granum</button>
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="ch-stroma">Stroma</button>
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="ch-inner">Inner membrane</button>
+    </div>
+
+    <div class="BioLabel-actions">
+      <button class="BioLabel-btn BioLabel-btn--primary" type="button" data-act="check">Check labels</button>
+      <button class="BioLabel-btn" type="button" data-act="reset">Clear</button>
+      <p class="BioLabel-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="BioLabel-figure" data-name="the mitochondrion" aria-labelledby="bio-mito-heading">
+    <h3 class="BioLabel-title" id="bio-mito-heading">Mitochondrion</h3>
+
+    <div class="BioLabel-stage">
+      <div class="BioLabel-scroll">
+        <div class="BioLabel-canvas">
+          <svg class="BioLabel-svg" viewBox="0 0 640 360" role="img" aria-labelledby="bio-mito-title">
+            <title id="bio-mito-title">Mitochondrion cross-section with five numbered blanks</title>
+            <defs>
+              <clipPath id="bio-mito-clip">
+                <ellipse cx="320" cy="180" rx="258" ry="106"/>
+              </clipPath>
+            </defs>
+            <ellipse cx="320" cy="180" rx="286" ry="130" fill="none" stroke="currentColor" stroke-width="4"/>
+            <ellipse cx="320" cy="180" rx="262" ry="110" style="fill: var(--bl-wash)" stroke="currentColor" stroke-width="2.5"/>
+            <g style="stroke: var(--bl-structure)" stroke-width="7" fill="none" stroke-linecap="round" clip-path="url(#bio-mito-clip)">
+              <path d="M58 158 Q 124 104 190 144 T 322 144 T 454 144 T 582 158"/>
+              <path d="M58 214 Q 124 260 190 226 T 322 226 T 454 226 T 582 214"/>
+              <path d="M92 264 Q 158 296 224 266 T 356 266 T 488 262"/>
+            </g>
+          </svg>
+
+          <button class="BioLabel-slot" type="button" data-answer="mt-outer" data-num="1" style="--x: 50%; --y: 14%" aria-label="Blank 1">1</button>
+          <button class="BioLabel-slot" type="button" data-answer="mt-inner" data-num="2" style="--x: 50%; --y: 80.5%" aria-label="Blank 2">2</button>
+          <button class="BioLabel-slot" type="button" data-answer="mt-intermembrane" data-num="3" style="--x: 78%; --y: 25%" aria-label="Blank 3">3</button>
+          <button class="BioLabel-slot" type="button" data-answer="mt-cristae" data-num="4" style="--x: 73%; --y: 42%" aria-label="Blank 4">4</button>
+          <button class="BioLabel-slot" type="button" data-answer="mt-matrix" data-num="5" style="--x: 39%; --y: 53%" aria-label="Blank 5">5</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="BioLabel-bank" role="group" aria-label="Mitochondrion words">
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="mt-matrix">Matrix</button>
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="mt-cristae">Cristae</button>
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="mt-outer">Outer membrane</button>
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="mt-intermembrane">Intermembrane space</button>
+      <button class="BioLabel-chip" type="button" draggable="true" data-key="mt-inner">Inner membrane</button>
+    </div>
+
+    <div class="BioLabel-actions">
+      <button class="BioLabel-btn BioLabel-btn--primary" type="button" data-act="check">Check labels</button>
+      <button class="BioLabel-btn" type="button" data-act="reset">Clear</button>
+      <p class="BioLabel-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById("bio-labeling");
+    if (!root) return;
+
+    Array.prototype.forEach.call(root.querySelectorAll(".BioLabel-figure"), setup);
+
+    function setup(figure) {
+      var slots = figure.querySelectorAll(".BioLabel-slot");
+      var chips = figure.querySelectorAll(".BioLabel-chip");
+      var status = figure.querySelector(".BioLabel-status");
+      var name = figure.getAttribute("data-name") || "diagram";
+      var selected = null;
+
+      function chipFor(key) {
+        var found = null;
+        Array.prototype.forEach.call(chips, function (chip) {
+          if (chip.getAttribute("data-key") === key) found = chip;
+        });
+        return found;
+      }
+
+      function labelFor(key) {
+        var chip = chipFor(key);
+        return chip ? chip.textContent : "";
+      }
+
+      function clearSelection() {
+        if (selected) selected.setAttribute("aria-pressed", "false");
+        selected = null;
+      }
+
+      function place(slot, key) {
+        var chip = chipFor(key);
+        if (!chip || chip.hidden) return;
+
+        var previous = slot.getAttribute("data-value");
+        if (previous) {
+          var old = chipFor(previous);
+          if (old) old.hidden = false;
+        }
+
+        slot.setAttribute("data-value", key);
+        slot.textContent = labelFor(key);
+        slot.className = "BioLabel-slot is-filled";
+        slot.setAttribute("aria-label", "Blank " + slot.getAttribute("data-num") + ": " + labelFor(key));
+        chip.hidden = true;
+        clearSelection();
+      }
+
+      function clearSlot(slot) {
+        var key = slot.getAttribute("data-value");
+        if (!key) return;
+
+        var chip = chipFor(key);
+        if (chip) chip.hidden = false;
+
+        slot.removeAttribute("data-value");
+        slot.textContent = slot.getAttribute("data-num");
+        slot.className = "BioLabel-slot";
+        slot.setAttribute("aria-label", "Blank " + slot.getAttribute("data-num"));
+      }
+
+      Array.prototype.forEach.call(chips, function (chip) {
+        chip.addEventListener("click", function () {
+          if (selected === chip) {
+            clearSelection();
+            status.textContent = "";
+            return;
+          }
+          clearSelection();
+          selected = chip;
+          chip.setAttribute("aria-pressed", "true");
+          status.textContent = "Selected " + chip.textContent + ". Tap the matching blank.";
+        });
+
+        chip.addEventListener("dragstart", function (event) {
+          if (!event.dataTransfer) return;
+          event.dataTransfer.setData("text/plain", chip.getAttribute("data-key"));
+          event.dataTransfer.effectAllowed = "move";
+          chip.classList.add("is-dragging");
+          clearSelection();
+        });
+
+        chip.addEventListener("dragend", function () {
+          chip.classList.remove("is-dragging");
+        });
+      });
+
+      Array.prototype.forEach.call(slots, function (slot) {
+        slot.addEventListener("click", function () {
+          if (slot.getAttribute("data-value")) {
+            clearSlot(slot);
+            status.textContent = "";
+            return;
+          }
+          if (!selected) {
+            status.textContent = "Pick a word from the list first.";
+            return;
+          }
+          place(slot, selected.getAttribute("data-key"));
+          status.textContent = "";
+        });
+
+        slot.addEventListener("dragover", function (event) {
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+          slot.classList.add("is-over");
+        });
+
+        slot.addEventListener("dragleave", function () {
+          slot.classList.remove("is-over");
+        });
+
+        slot.addEventListener("drop", function (event) {
+          event.preventDefault();
+          slot.classList.remove("is-over");
+          var key = event.dataTransfer ? event.dataTransfer.getData("text/plain") : "";
+          if (key) place(slot, key);
+        });
+      });
+
+      figure.querySelector('[data-act="check"]').addEventListener("click", function () {
+        var filled = 0;
+        var correct = 0;
+        var blanks = 0;
+
+        Array.prototype.forEach.call(slots, function (slot) {
+          slot.classList.remove("is-correct", "is-wrong");
+          var value = slot.getAttribute("data-value");
+          if (!value) {
+            blanks += 1;
+            return;
+          }
+          filled += 1;
+          if (value === slot.getAttribute("data-answer")) {
+            slot.classList.add("is-correct");
+            correct += 1;
+          } else {
+            slot.classList.add("is-wrong");
+          }
+        });
+
+        if (!filled) {
+          status.textContent = "Drag a label onto a blank first.";
+          return;
+        }
+        if (blanks) {
+          status.textContent = correct + " of " + slots.length + " correct, " + blanks + " blank" + (blanks === 1 ? "" : "s") + " still empty.";
+          return;
+        }
+        if (correct === slots.length) {
+          status.textContent = "All " + slots.length + " correct — " + name + " finished.";
+          return;
+        }
+        status.textContent = correct + " of " + slots.length + " correct. Fix the red labels and check again.";
+      });
+
+      figure.querySelector('[data-act="reset"]').addEventListener("click", function () {
+        Array.prototype.forEach.call(slots, clearSlot);
+        clearSelection();
+        status.textContent = "";
+      });
+    }
+  })();
+</script>
