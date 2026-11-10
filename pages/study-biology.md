@@ -123,6 +123,21 @@ guide is due Thursday.
   .StudyCal-tasks li + li {
     margin-top: 0.45rem;
   }
+  .StudyCal-tasks a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(47, 133, 90, 0.5);
+    text-underline-offset: 2px;
+  }
+  .StudyCal-tasks a:hover {
+    text-decoration-thickness: 2px;
+    text-decoration-color: #2f855a;
+  }
+  .StudyCal-tasks a:focus-visible {
+    outline: 2px solid #2f855a;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 </style>
 
 <div class="StudyWeek">
@@ -193,14 +208,14 @@ guide is due Thursday.
 Unit 3: Cellular Energy. Check each item off when you can explain it without your
 notes open.
 
-### ATP
+### ATP {#atp}
 
 - What ATP does, and why cells use it to do cellular work
 - ATP vs. ADP + P
 - How ATP transfers energy
 - Where the energy is stored
 
-### Photosynthesis — the big picture
+### Photosynthesis — the big picture {#photosynthesis}
 
 - Autotroph vs. heterotroph
 - Inputs and outputs of photosynthesis
@@ -212,7 +227,7 @@ notes open.
 - Review handout 4-3, the photosynthesis notes, and the class drawings
   (light dependent and light independent reactions)
 
-### Cellular respiration — the big picture
+### Cellular respiration — the big picture {#cellular-respiration}
 
 - Inputs, outputs, and the chemical formula
 - Mitochondria structure
@@ -223,7 +238,7 @@ notes open.
 - Electron transport chain details
 - Review the cellular respiration notes and the drawings made together in class
 
-### Anaerobic respiration
+### Anaerobic respiration {#anaerobic-respiration}
 
 - Both fermentation types use glycolysis
 - Alcoholic fermentation
@@ -232,17 +247,17 @@ notes open.
 
 ## Study calendar
 
-The same plan as a week you can follow one day at a time. Monday is the class
-day that started it; studying runs Tuesday through Friday morning, about 2 hours
-40 minutes in total.
+The same plan as a week you can follow one day at a time. Each task links to
+the part of this page that covers it. Monday is the class day that started it;
+studying runs Tuesday through Friday morning, about 2 hours 40 minutes in total.
 
 <ol class="StudyCal" aria-label="Study calendar, November 9 to 13">
   <li class="StudyCal-day">
     <p class="StudyCal-date">Mon <span>Nov 9</span></p>
     <p class="StudyCal-meta"><span class="StudyCal-tag">In class</span></p>
     <ul class="StudyCal-tasks">
-      <li><strong>Class:</strong> notes on ATP, photosynthesis, and cellular respiration</li>
-      <li><strong>Class:</strong> Krebs cycle and ETC notes</li>
+      <li><a href="#chapter-4-test-week"><strong>Class:</strong> notes on ATP, photosynthesis, and cellular respiration</a></li>
+      <li><a href="#chapter-4-test-week"><strong>Class:</strong> Krebs cycle and ETC notes</a></li>
       <li><strong>Assigned:</strong> Amoeba Sisters video, due Tuesday</li>
     </ul>
   </li>
@@ -250,35 +265,35 @@ day that started it; studying runs Tuesday through Friday morning, about 2 hours
     <p class="StudyCal-date">Tue <span>Nov 10</span></p>
     <p class="StudyCal-meta"><span class="StudyCal-tag">45 min</span></p>
     <ul class="StudyCal-tasks">
-      <li><strong>15 min — ATP:</strong> what it does, ATP vs. ADP + P, how it transfers energy, where the energy is stored <em>(ATP notes)</em></li>
-      <li><strong>15 min — Photosynthesis big picture:</strong> autotroph vs. heterotroph, inputs and outputs, the equation, pigment names and colors <em>(notes, handout 4-3)</em></li>
-      <li><strong>15 min — Chloroplast:</strong> label it from memory, then check <em>(class drawing)</em></li>
+      <li><a href="#atp"><strong>15 min — ATP:</strong> what it does, ATP vs. ADP + P, how it transfers energy, where the energy is stored <em>(ATP notes)</em></a></li>
+      <li><a href="#photosynthesis"><strong>15 min — Photosynthesis big picture:</strong> autotroph vs. heterotroph, inputs and outputs, the equation, pigment names and colors <em>(notes, handout 4-3)</em></a></li>
+      <li><a href="#photosynthesis"><strong>15 min — Chloroplast:</strong> label it from memory, then check <em>(class drawing)</em></a></li>
     </ul>
   </li>
   <li class="StudyCal-day">
     <p class="StudyCal-date">Wed <span>Nov 11</span></p>
     <p class="StudyCal-meta"><span class="StudyCal-tag">50 min</span></p>
     <ul class="StudyCal-tasks">
-      <li><strong>20 min — Draw:</strong> photosynthesis and the chloroplast from memory, then fill gaps <em>(notes, drawings)</em></li>
-      <li><strong>15 min — Compare:</strong> light reactions vs. Calvin cycle, said out loud <em>(handout 4-3)</em></li>
-      <li><strong>15 min — Cellular respiration big picture:</strong> inputs, outputs, formula, mitochondria structure <em>(notes)</em></li>
+      <li><a href="#photosynthesis"><strong>20 min — Draw:</strong> photosynthesis and the chloroplast from memory, then fill gaps <em>(notes, drawings)</em></a></li>
+      <li><a href="#photosynthesis"><strong>15 min — Compare:</strong> light reactions vs. Calvin cycle, said out loud <em>(handout 4-3)</em></a></li>
+      <li><a href="#cellular-respiration"><strong>15 min — Cellular respiration big picture:</strong> inputs, outputs, formula, mitochondria structure <em>(notes)</em></a></li>
     </ul>
   </li>
   <li class="StudyCal-day">
     <p class="StudyCal-date">Thu <span>Nov 12</span></p>
     <p class="StudyCal-meta"><span class="StudyCal-tag">55 min</span></p>
     <ul class="StudyCal-tasks">
-      <li><strong>25 min — Respiration details:</strong> glucose to ATP, glycolysis, Krebs, ETC; redraw the mitochondria and ETC <em>(notes, drawings)</em></li>
-      <li><strong>15 min — Anaerobic:</strong> alcoholic vs. lactic acid fermentation, both use glycolysis; review the yeast lab</li>
-      <li><strong>15 min — Check:</strong> quiz mode until 16 of 17 twice, then a one-page summary <em>(quiz, paper)</em></li>
+      <li><a href="#cellular-respiration"><strong>25 min — Respiration details:</strong> glucose to ATP, glycolysis, Krebs, ETC; redraw the mitochondria and ETC <em>(notes, drawings)</em></a></li>
+      <li><a href="#anaerobic-respiration"><strong>15 min — Anaerobic:</strong> alcoholic vs. lactic acid fermentation, both use glycolysis; review the yeast lab</a></li>
+      <li><a href="#vocabulary"><strong>15 min — Check:</strong> quiz mode until 16 of 17 twice, then a one-page summary <em>(quiz, paper)</em></a></li>
     </ul>
   </li>
   <li class="StudyCal-day StudyCal-day--test">
     <p class="StudyCal-date">Fri <span>Nov 13</span></p>
     <p class="StudyCal-meta"><span class="StudyCal-tag">Test day</span><span class="StudyCal-tag">10 min</span></p>
     <ul class="StudyCal-tasks">
-      <li><strong>Before class:</strong> one flashcard pass and read the summary sheet <em>(flashcards)</em></li>
-      <li><strong>Test:</strong> Unit 3 Cellular Energy</li>
+      <li><a href="#vocabulary"><strong>Before class:</strong> one flashcard pass and read the summary sheet <em>(flashcards)</em></a></li>
+      <li><a href="#chapter-4-test-week"><strong>Test:</strong> Unit 3 Cellular Energy</a></li>
     </ul>
   </li>
 </ol>
@@ -286,7 +301,7 @@ day that started it; studying runs Tuesday through Friday morning, about 2 hours
 Short on time? Do one 15-minute block: a flashcard pass, then one diagram from
 memory (chloroplast or mitochondria).
 
-## Chapter 4 vocabulary
+## Chapter 4 vocabulary {#vocabulary}
 
 Seventeen cards for the words that show up on the test: ATP, glycolysis, the
 Krebs cycle, the electron transport chain, photosynthesis, and the two kinds of
