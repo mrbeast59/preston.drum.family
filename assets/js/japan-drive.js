@@ -178,6 +178,43 @@ camera.position.set(CONFIG.spawn.x, 8, CONFIG.spawn.z - 12);
 const world = new THREE.Group();
 scene.add(world);
 
+// A tiny procedural sky probe gives the paint, glass and rims something to
+// reflect. Without it, high-metalness materials read as flat black.
+function buildEnvironmentProbe() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  const skyGradient = ctx.createLinearGradient(0, 0, 0, 128);
+  skyGradient.addColorStop(0, '#3d6fa5');
+  skyGradient.addColorStop(.62, '#9fc5d5');
+  skyGradient.addColorStop(1, '#f0c99d');
+  ctx.fillStyle = skyGradient;
+  ctx.fillRect(0, 0, 512, 128);
+  const groundGradient = ctx.createLinearGradient(0, 128, 0, 256);
+  groundGradient.addColorStop(0, '#67796d');
+  groundGradient.addColorStop(1, '#28352f');
+  ctx.fillStyle = groundGradient;
+  ctx.fillRect(0, 128, 512, 128);
+  const sun = ctx.createRadialGradient(358, 92, 0, 358, 92, 58);
+  sun.addColorStop(0, 'rgba(255,247,218,1)');
+  sun.addColorStop(.16, 'rgba(255,224,173,.7)');
+  sun.addColorStop(1, 'rgba(255,224,173,0)');
+  ctx.fillStyle = sun;
+  ctx.fillRect(270, 20, 180, 180);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const generator = new THREE.PMREMGenerator(renderer);
+  const renderTarget = generator.fromEquirectangular(texture);
+  texture.dispose();
+  generator.dispose();
+  return renderTarget;
+}
+
+const environmentProbe = buildEnvironmentProbe();
+scene.environment = environmentProbe.texture;
+
 // Bake static meshes that share a material into single draw calls. This keeps
 // distant city blocks, roadside furniture and road ribbons cheap to render.
 function mergeStaticGroup(group) {
@@ -750,6 +787,7 @@ weatherState.petals = makePoints(260, 0xffb8ca, .32, .75);
 // ---------------------------------------------------------------------------
 const roadGroup = new THREE.Group();
 world.add(roadGroup);
+const colliders = [];
 const roads = [];
 const roadSegments = [];
 const elevatedRoads = [];
@@ -1065,13 +1103,12 @@ function addElevatedRoad(name, coords, width, height, level) {
       const colH = y - CITY.elevation;
       const colMat = new THREE.MeshStandardMaterial({ color: 0x707978, roughness: .82 });
       for (const side of [-1, 1]) {
+        const cx = p.x + nx * side * (width / 2 + 1.4);
+        const cz = p.z + nz * side * (width / 2 + 1.4);
         const col = new THREE.Mesh(new THREE.BoxGeometry(1.6, colH, 1.6), colMat);
-        col.position.set(
-          p.x + nx * side * (width / 2 + 1.4),
-          CITY.elevation + colH / 2,
-          p.z + nz * side * (width / 2 + 1.4)
-        );
+        col.position.set(cx, CITY.elevation + colH / 2, cz);
         roadGroup.add(col);
+        colliders.push({ minX: cx - .85, maxX: cx + .85, minZ: cz - .85, maxZ: cz + .85, top: y + .7, kind: 'support' });
       }
     }
   }
@@ -1099,7 +1136,6 @@ const cityGroup = new THREE.Group();
 const sceneryGroup = new THREE.Group();
 const suburbGroup = new THREE.Group();
 world.add(cityGroup, sceneryGroup, suburbGroup);
-const colliders = [];
 const buildingMaterials = [
   new THREE.MeshStandardMaterial({ map: windowTexA, color: 0xffffff, emissive: 0x5d3d1e, emissiveIntensity: .14, roughness: .82, metalness: .08 }),
   new THREE.MeshStandardMaterial({ map: windowTexB, color: 0xffffff, emissive: 0x12384a, emissiveIntensity: .12, roughness: .74, metalness: .16 }),
@@ -1138,7 +1174,7 @@ function addBuilding(x, z, w, d, h, materialIndex) {
     mast.position.set(x + rand(-w * .25, w * .25), base + h + 4, z + rand(-d * .25, d * .25));
     cityGroup.add(mast);
   }
-  colliders.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, kind: 'building' });
+  colliders.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, top: base + h, kind: 'building' });
 
   if (h > 34 && worldRandom() < .2) {
     const signText = pick(['ネオン', 'カイ', '夜', '走', '港', '山', 'OPEN', 'KAZE']);
@@ -1196,6 +1232,7 @@ for (const b of blockCenters) {
 
 // City gateway + street furniture
 function addCityGateway(x, z, rotation = 0) {
+  const base = terrainHeight(x, z);
   const group = new THREE.Group();
   const beanMat = new THREE.MeshStandardMaterial({ color: 0x5b1f1b, roughness: .55, metalness: .4 });
   for (const side of [-1, 1]) {
@@ -1209,9 +1246,14 @@ function addCityGateway(x, z, rotation = 0) {
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(22, 3.4), new THREE.MeshBasicMaterial({ map: makeLabelTexture('NEON WARD', '#fff7df', 'rgba(8,12,15,.92)', '#ff4b3e'), transparent: true, toneMapped: false }));
   sign.position.set(0, 7.1, .95);
   group.add(sign);
-  group.position.set(x, terrainHeight(x, z), z);
+  group.position.set(x, base, z);
   group.rotation.y = rotation;
   cityGroup.add(group);
+  for (const side of [-1, 1]) {
+    const px = x + Math.cos(rotation) * side * 13;
+    const pz = z - Math.sin(rotation) * side * 13;
+    colliders.push({ minX: px - .9, maxX: px + .9, minZ: pz - .9, maxZ: pz + .9, top: base + 9, kind: 'gateway' });
+  }
 }
 addCityGateway(-270, 380, Math.PI / 2);
 
@@ -1286,13 +1328,14 @@ for (let i = 0; i < 22; i++) {
   const stack = (i % 3);
   const c = addBox(harborGroup, x, 2 + stack * 2.6, z, 10, 2.5, 4.4, containerMats[i % containerMats.length]);
   c.rotation.y = (i % 2) * .04;
-  if (i < 10) colliders.push({ minX: x - 5, maxX: x + 5, minZ: z - 2.2, maxZ: z + 2.2, kind: 'container' });
+  if (i < 10) colliders.push({ minX: x - 5, maxX: x + 5, minZ: z - 2.2, maxZ: z + 2.2, top: 2 + stack * 2.6 + 1.25, kind: 'container' });
 }
 
 // Gantry cranes.
 for (const z of [300, 430]) {
   for (const x of [-870, -820]) {
     addBox(harborGroup, x, 12, z, 1.2, 24, 1.2, poleMat);
+    colliders.push({ minX: x - .75, maxX: x + .75, minZ: z - .75, maxZ: z + .75, top: 24, kind: 'gantry' });
   }
   addBox(harborGroup, -845, 24, z, 52, 1.4, 1.4, poleMat);
   addBox(harborGroup, -868, 19, z, 1.2, 1.2, 18, poleMat);
@@ -1313,6 +1356,7 @@ sceneryGroup.add(beacon);
 const cap = new THREE.Mesh(new THREE.ConeGeometry(2.7, 2.3, 10), new THREE.MeshStandardMaterial({ color: 0x293234, metalness: .5, roughness: .5 }));
 cap.position.set(-930, 20.3, 610);
 sceneryGroup.add(cap);
+colliders.push({ minX: -933.4, maxX: -926.6, minZ: 606.6, maxZ: 613.4, top: 22, kind: 'lighthouse' });
 
 // A simple container ship silhouette out in the bay.
 const ship = new THREE.Group();
@@ -1355,7 +1399,7 @@ function addHouse(x, z, scale = 1, color = 0xd8d1c1) {
   group.position.set(x, base, z);
   group.rotation.y = rand(-.4, .4);
   suburbGroup.add(group);
-  colliders.push({ minX: x - 5 * scale, maxX: x + 5 * scale, minZ: z - 5.6 * scale, maxZ: z + 5.6 * scale, kind: 'house' });
+  colliders.push({ minX: x - 5 * scale, maxX: x + 5 * scale, minZ: z - 5.6 * scale, maxZ: z + 5.6 * scale, top: base + 9 * scale, kind: 'house' });
 }
 
 let houseCount = 0;
@@ -1395,7 +1439,7 @@ function addBarn(x, z, rot = 0) {
   group.position.set(x, base, z);
   group.rotation.y = rot;
   suburbGroup.add(group);
-  colliders.push({ minX: x - 10, maxX: x + 10, minZ: z - 13, maxZ: z + 13, kind: 'barn' });
+  colliders.push({ minX: x - 10, maxX: x + 10, minZ: z - 13, maxZ: z + 13, top: base + 15, kind: 'barn' });
   return { x, z, y: base, rot };
 }
 
@@ -1908,6 +1952,9 @@ function addGate(x, z, angle, width, label, color, height = 6.4) {
     const strip = new THREE.Mesh(new THREE.BoxGeometry(.12, height * .75, .68), glow);
     strip.position.set(side * width / 2, height * .45, .02);
     group.add(strip);
+    const px = x + Math.cos(angle) * side * width / 2;
+    const pz = z - Math.sin(angle) * side * width / 2;
+    colliders.push({ minX: px - .45, maxX: px + .45, minZ: pz - .45, maxZ: pz + .45, top: base + height, kind: 'gate' });
   }
   const beam = new THREE.Mesh(new THREE.BoxGeometry(width + .8, .5, .65), postMat);
   beam.position.y = height;
@@ -2261,6 +2308,14 @@ const rimMat = new THREE.MeshStandardMaterial({ color: 0x9aa5a8, metalness: .92,
 const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffedbf, emissiveIntensity: 2.5, roughness: .18 });
 const tailMat = new THREE.MeshStandardMaterial({ color: 0x5f0910, emissive: 0xff1b2d, emissiveIntensity: .65, roughness: .35 });
 const brakeMat = new THREE.MeshStandardMaterial({ color: 0x8a0e14, emissive: 0xff281e, emissiveIntensity: .35, roughness: .3 });
+paintMat.envMapIntensity = 1.15;
+carbonMat.envMapIntensity = .45;
+glassMat.envMapIntensity = 1.4;
+rimMat.envMapIntensity = 1.5;
+headMat.envMapIntensity = .4;
+tailMat.envMapIntensity = .5;
+brakeMat.envMapIntensity = .5;
+goldMat.envMapIntensity = .8;
 
 const profile = new THREE.Shape();
 profile.moveTo(-2.18, .30);
@@ -2293,14 +2348,16 @@ bodyMesh.castShadow = false;
 bodyMesh.receiveShadow = false;
 carBody.add(bodyMesh);
 
-const roofPanel = new THREE.Mesh(new THREE.BoxGeometry(1.24, .045, 1.34), carbonMat);
-roofPanel.position.set(0, 1.335, -.36);
+const roofPanel = new THREE.Mesh(new THREE.BoxGeometry(1.24, .045, .76), carbonMat);
+roofPanel.position.set(0, 1.335, 0);
 carBody.add(roofPanel);
 
 for (const side of [-1, 1]) {
-  const window = new THREE.Mesh(new THREE.PlaneGeometry(1.5, .35), glassMat);
+  const window = new THREE.Mesh(new THREE.PlaneGeometry(1.42, .32), glassMat);
   window.rotation.y = side * Math.PI / 2;
-  window.position.set(side * .805, 1.09, -.24);
+  // Sit just proud of the tapered body side; the old .805 plane was buried
+  // behind the paint surface.
+  window.position.set(side * .89, 1.10, -.22);
   carBody.add(window);
   const mirrorArm = new THREE.Mesh(new THREE.BoxGeometry(.22, .04, .04), carbonMat);
   mirrorArm.position.set(side * .88, 1.00, .56);
@@ -2310,13 +2367,14 @@ for (const side of [-1, 1]) {
   carBody.add(mirror);
 }
 
-const windshield = new THREE.Mesh(new THREE.PlaneGeometry(1.18, .46), glassMat);
-windshield.position.set(0, 1.11, .66);
-windshield.rotation.x = -.60;
+const windshield = new THREE.Mesh(new THREE.PlaneGeometry(1.14, .58), glassMat);
+windshield.position.set(0, 1.27, .85);
+windshield.rotation.x = -1.23;
 carBody.add(windshield);
-const rearGlass = new THREE.Mesh(new THREE.PlaneGeometry(1.04, .33), glassMat);
-rearGlass.position.set(0, 1.06, -1.22);
-rearGlass.rotation.x = .52;
+const rearGlass = new THREE.Mesh(new THREE.PlaneGeometry(1.02, .46), glassMat);
+rearGlass.position.set(0, 1.23, -.83);
+// Lie the pane along the rear slope instead of sinking it into the trunk.
+rearGlass.rotation.set(-1.23, Math.PI, 0);
 carBody.add(rearGlass);
 
 const lowerTrim = new THREE.Mesh(new THREE.BoxGeometry(1.70, .09, 3.42), carbonMat);
@@ -2335,24 +2393,55 @@ rearDiffuser.position.set(0, .23, -2.07);
 carBody.add(rearDiffuser);
 
 const grille = new THREE.Mesh(new THREE.BoxGeometry(1.06, .15, .05), carbonMat);
-grille.position.set(0, .50, 2.20);
+grille.position.set(0, .50, 2.36);
 carBody.add(grille);
 for (const side of [-1, 1]) {
-  const headlight = new THREE.Mesh(new THREE.BoxGeometry(.48, .07, .05), headMat);
-  headlight.position.set(side * .50, .68, 2.18);
+  const headlight = new THREE.Mesh(new THREE.BoxGeometry(.48, .09, .05), headMat);
+  headlight.position.set(side * .50, .68, 2.34);
   carBody.add(headlight);
   const corner = new THREE.Mesh(new THREE.BoxGeometry(.16, .10, .06), new THREE.MeshBasicMaterial({ color: 0xffb34d, toneMapped: false }));
-  corner.position.set(side * .68, .54, 2.15);
+  corner.position.set(side * .68, .54, 2.36);
   carBody.add(corner);
 }
 const tailBar = new THREE.Mesh(new THREE.BoxGeometry(1.42, .07, .05), tailMat);
-tailBar.position.set(0, .67, -2.23);
+tailBar.position.set(0, .72, -2.315);
 carBody.add(tailBar);
+for (const side of [-1, 1]) {
+  const brakeLight = new THREE.Mesh(new THREE.BoxGeometry(.22, .16, .045), brakeMat);
+  brakeLight.position.set(side * .58, .68, -2.32);
+  carBody.add(brakeLight);
+}
 
 const ducktail = new THREE.Mesh(new THREE.BoxGeometry(1.48, .05, .24), carbonMat);
 ducktail.position.set(0, .98, -2.10);
 ducktail.rotation.x = -.12;
 carBody.add(ducktail);
+
+const plateTex = makeTexture(256, 96, (g, w, h) => {
+  g.fillStyle = '#f1efdc';
+  g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#8f9d8e';
+  g.lineWidth = 4;
+  g.strokeRect(3, 3, w - 6, h - 6);
+  g.fillStyle = '#1b3438';
+  g.font = '900 50px Segoe UI, Arial, sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText('KAI · 01', w / 2, h / 2 + 2);
+});
+const plate = new THREE.Mesh(new THREE.PlaneGeometry(.54, .20), new THREE.MeshBasicMaterial({ map: plateTex, toneMapped: false }));
+plate.position.set(0, .48, -2.32);
+plate.rotation.y = Math.PI;
+carBody.add(plate);
+const exhaustMat = new THREE.MeshStandardMaterial({ color: 0x9aa5a8, metalness: .9, roughness: .3 });
+exhaustMat.envMapIntensity = 1.3;
+for (const side of [-1, 1]) {
+  const exhaustGeo = new THREE.CylinderGeometry(.065, .075, .22, 10);
+  exhaustGeo.rotateX(Math.PI / 2);
+  const exhaust = new THREE.Mesh(exhaustGeo, exhaustMat);
+  exhaust.position.set(side * .43, .205, -2.25);
+  carBody.add(exhaust);
+}
 
 const decalTex = makeTexture(512, 128, (g, w, h) => {
   g.clearRect(0, 0, w, h);
@@ -2374,38 +2463,41 @@ for (const side of [-1, 1]) {
   decal.position.set(side * .887, .66, .30);
   carBody.add(decal);
 }
+mergeStaticGroup(carBody);
 
 const wheelData = [];
+const caliperMat = new THREE.MeshStandardMaterial({ color: 0xffc23d, metalness: .4, roughness: .4 });
 function addWheel(x, z, front) {
   const pivot = new THREE.Group();
-  pivot.position.set(x, .37, z);
+  pivot.position.set(x, .40, z);
   const spin = new THREE.Group();
   pivot.add(spin);
-  const tireGeo = new THREE.CylinderGeometry(.36, .36, .28, 16);
+  const tireGeo = new THREE.CylinderGeometry(.385, .385, .30, 18);
   tireGeo.rotateZ(Math.PI / 2);
   const tire = new THREE.Mesh(tireGeo, tireMat);
   spin.add(tire);
-  const rimGeo = new THREE.CylinderGeometry(.225, .225, .3, 12);
+  const rimGeo = new THREE.CylinderGeometry(.25, .25, .32, 12);
   rimGeo.rotateZ(Math.PI / 2);
   const rim = new THREE.Mesh(rimGeo, rimMat);
   spin.add(rim);
   const sign = Math.sign(x);
   for (let i = 0; i < 5; i++) {
-    const spoke = new THREE.Mesh(new THREE.BoxGeometry(.018, .34, .055), rimMat);
-    spoke.position.x = sign * .152;
+    const spoke = new THREE.Mesh(new THREE.BoxGeometry(.018, .38, .058), rimMat);
+    spoke.position.x = sign * .162;
     spoke.rotation.x = i * Math.PI / 5;
     spin.add(spoke);
   }
-  const caliper = new THREE.Mesh(new THREE.BoxGeometry(.04, .1, .13), new THREE.MeshStandardMaterial({ color: 0xffc23d, metalness: .4, roughness: .4 }));
-  caliper.position.set(sign * .17, .16, 0);
+  const caliper = new THREE.Mesh(new THREE.BoxGeometry(.04, .1, .13), caliperMat);
+  caliper.position.set(sign * .18, .16, 0);
   spin.add(caliper);
   carRoot.add(pivot);
+  mergeStaticGroup(spin);
   wheelData.push({ pivot, spin, front, sign });
 }
-addWheel(-.88, 1.33, true);
-addWheel(.88, 1.33, true);
-addWheel(-.88, -1.34, false);
-addWheel(.88, -1.34, false);
+addWheel(-.92, 1.36, true);
+addWheel(.92, 1.36, true);
+addWheel(-.92, -1.36, false);
+addWheel(.92, -1.36, false);
 
 const headlight = new THREE.SpotLight(0xffeccb, 0, 80, .32, .55, 1.2);
 headlight.position.set(0, .92, 1.9);
@@ -2671,18 +2763,26 @@ function updateCar(dt) {
   brakeMat.emissiveIntensity = .4 + (input.down || handbrake ? 2.2 : 0);
 }
 
+function cameraBlocked(x, y, z) {
+  for (const c of colliders) {
+    if (c.top != null && y > c.top) continue;
+    if (x > c.minX - .38 && x < c.maxX + .38 && z > c.minZ - .38 && z < c.maxZ + .38) return true;
+  }
+  return false;
+}
+
 const cameraDesired = new THREE.Vector3();
 const cameraLook = new THREE.Vector3();
 function updateCamera(dt) {
   const fwd = { x: Math.sin(car.heading), z: Math.cos(car.heading) };
   const speed = car.speed;
-  let distance = 10.4 + speed * .045;
-  let height = 4.05 + speed * .012;
-  let lookAhead = 6.2;
+  let distance = 9.6 + speed * .04;
+  let height = 3.25 + speed * .012;
+  let lookAhead = 6.4;
   if (car.cameraMode === 1) {
-    distance = 14.5;
-    height = 6.3;
-    lookAhead = 7;
+    distance = 13.8;
+    height = 5.0;
+    lookAhead = 7.4;
   } else if (car.cameraMode === 2) {
     distance = -0.2;
     height = 1.18;
@@ -2695,16 +2795,16 @@ function updateCamera(dt) {
   );
   if (car.cameraMode !== 2) {
     const originX = car.x;
-    const originY = car.y + 1.45;
+    const originY = car.y + 1.4;
     const originZ = car.z;
     let safeT = 1;
-    for (let i = 1; i <= 6; i++) {
-      const t = i / 6;
+    for (let i = 1; i <= 7; i++) {
+      const t = i / 7;
       const sx = lerp(originX, desired.x, t);
       const sz = lerp(originZ, desired.z, t);
       const sy = lerp(originY, desired.y, t);
-      if (terrainHeight(sx, sz) + 1.05 > sy) {
-        safeT = Math.max(.2, (i - 1) / 6);
+      if (terrainHeight(sx, sz) + 1.05 > sy || cameraBlocked(sx, sy, sz)) {
+        safeT = Math.max(.2, (i - 1) / 7);
         break;
       }
     }
@@ -2717,11 +2817,14 @@ function updateCamera(dt) {
   }
   const floor = visualTerrainHeight(desired.x, desired.z) + 1.15;
   if (desired.y < floor) desired.y = floor;
-  const rate = car.cameraMode === 2 ? 22 : 5.5;
+  const rate = car.cameraMode === 2 ? 22 : 7.5;
   camera.position.lerp(desired, 1 - Math.exp(-rate * dt));
+  if (car.cameraMode !== 2 && cameraBlocked(camera.position.x, camera.position.y, camera.position.z)) {
+    camera.position.copy(desired);
+  }
   const look = cameraLook.set(
     car.x + fwd.x * lookAhead,
-    car.y + (car.cameraMode === 2 ? 1.15 : 1.5),
+    car.y + (car.cameraMode === 2 ? 1.15 : 1.35),
     car.z + fwd.z * lookAhead
   );
   camera.lookAt(look);
@@ -3579,7 +3682,7 @@ function updateHud(dt) {
   ui.area.textContent = regionAt(car.x, car.z, car.terrainHeight);
   ui.clock.textContent = formatClock(game.time);
   ui.weather.textContent = weatherName(game.weather);
-  ui.weatherShort.textContent = weatherName(game.weather) + ' skies';
+  ui.weatherShort.textContent = game.weather === 'clear' ? 'Clear skies' : `${weatherName(game.weather)} front`;
   ui.altitude.textContent = `${Math.max(0, Math.round(car.terrainHeight))} m`;
   ui.score.textContent = Math.round(game.xp).toLocaleString();
   ui.rank.textContent = rankFor(game.xp);
