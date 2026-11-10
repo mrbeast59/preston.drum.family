@@ -184,7 +184,7 @@ permalink: /japan-drive/
       <div>
         <div class="map-kicker">Kai Prefecture · Open Road</div>
         <h2>THE WHOLE MAP</h2>
-        <p>Coast, city, rice plains, switchbacks and alpine snow. Every marker is a place to drive.</p>
+        <p>Shaded relief, clean road book, coast, city, switchbacks and alpine snow. Every marker is a place to drive.</p>
       </div>
       <button id="mapClose" type="button">CLOSE · M</button>
     </div>

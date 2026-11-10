@@ -9,12 +9,13 @@ import * as THREE from 'three';
 
 const CONFIG = {
   worldSize: 2400,
-  chunkSize: 300,
-  terrainNearSegments: 24,
-  terrainFarSegments: 7,
-  lodNearDistance: 740,
+  chunkSize: 600,
+  terrainNearSegments: 48,
+  terrainFarSegments: 14,
+  lodNearDistance: 760,
   seaLevel: 0,
   hillScale: 1,
+  maxClimbSlope: .82,
   city: { x: -520, z: 380, width: 460, depth: 440, elevation: 8, blend: 108 },
   spawn: { x: -620, z: 280, heading: Math.PI / 2 },
   dayLengthSeconds: 720,
@@ -155,8 +156,13 @@ const ui = {
   rainFlash: $('rainFlash')
 };
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.35));
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', stencil: false });
+const quality = {
+  maxPixelRatio: Math.min(window.devicePixelRatio || 1, 1.35),
+  scale: 1,
+  timer: 0
+};
+renderer.setPixelRatio(quality.maxPixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -171,6 +177,76 @@ camera.position.set(CONFIG.spawn.x, 8, CONFIG.spawn.z - 12);
 
 const world = new THREE.Group();
 scene.add(world);
+
+// Bake static meshes that share a material into single draw calls. This keeps
+// distant city blocks, roadside furniture and road ribbons cheap to render.
+function mergeStaticGroup(group) {
+  if (!group || group.userData.staticMerged) return group;
+  group.updateMatrixWorld(true);
+  const meshes = [];
+  group.traverse((object) => {
+    if (object.isMesh && !object.isInstancedMesh) meshes.push(object);
+  });
+  if (!meshes.length) return group;
+
+  const inverse = new THREE.Matrix4().copy(group.matrixWorld).invert();
+  const matrix = new THREE.Matrix4();
+  const buckets = new Map();
+  const mergedMeshes = [];
+
+  for (const mesh of meshes) {
+    if (!mesh.geometry || Array.isArray(mesh.material)) continue;
+    let geometry = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
+    matrix.multiplyMatrices(inverse, mesh.matrixWorld);
+    geometry.applyMatrix4(matrix);
+    if (!geometry.attributes.normal) geometry.computeVertexNormals();
+    const position = geometry.attributes.position;
+    if (!position) { geometry.dispose(); continue; }
+    const normal = geometry.attributes.normal;
+    const uv = geometry.attributes.uv;
+    const key = mesh.material.uuid;
+    let bucket = buckets.get(key);
+    if (!bucket) {
+      bucket = { material: mesh.material, positions: [], normals: [], uvs: [] };
+      buckets.set(key, bucket);
+    }
+    for (let i = 0; i < position.count; i++) {
+      bucket.positions.push(position.getX(i), position.getY(i), position.getZ(i));
+      bucket.normals.push(normal.getX(i), normal.getY(i), normal.getZ(i));
+      bucket.uvs.push(uv ? uv.getX(i) : 0, uv ? uv.getY(i) : 0);
+    }
+    mergedMeshes.push(mesh);
+    geometry.dispose();
+  }
+
+  for (const mesh of mergedMeshes) mesh.removeFromParent();
+  for (const bucket of buckets.values()) {
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(bucket.positions, 3));
+    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(bucket.normals, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(bucket.uvs, 2));
+    geometry.computeBoundingSphere();
+    const mesh = new THREE.Mesh(geometry, bucket.material);
+    mesh.frustumCulled = true;
+    group.add(mesh);
+  }
+  group.userData.staticMerged = true;
+  return group;
+}
+
+function updateAdaptiveQuality(dt) {
+  quality.timer += dt;
+  if (quality.timer < 2.5) return;
+  quality.timer = 0;
+  if (game.fps < 44 && quality.scale > .7) {
+    quality.scale = Math.max(.7, quality.scale - .06);
+    renderer.setPixelRatio(quality.maxPixelRatio * quality.scale);
+  } else if (game.fps > 56 && quality.scale < 1) {
+    quality.scale = Math.min(1, quality.scale + .03);
+    renderer.setPixelRatio(quality.maxPixelRatio * quality.scale);
+  }
+}
+
 
 // ---------------------------------------------------------------------------
 // Textures
@@ -420,21 +496,21 @@ const COLORS = {
   cityLight: new THREE.Color(0x6b726e)
 };
 
-function terrainColor(x, z, h) {
+function terrainColor(x, z, h, target = null) {
   const moisture = fbm(x * .004 + 22, z * .004 - 9, 3);
   const patch = fbm(x * .016 - 3, z * .016 + 12, 2);
   const city = cityMaskAt(x, z);
-  let c;
+  const c = target || new THREE.Color();
   if (h < 1.2) {
-    c = COLORS.wetSand.clone();
+    c.copy(COLORS.wetSand);
   } else if (h < 4.8) {
-    c = COLORS.sand.clone().lerp(COLORS.grass, smoothstep(1.2, 5, h));
+    c.copy(COLORS.sand).lerp(COLORS.grass, smoothstep(1.2, 5, h));
   } else if (h > 188) {
-    c = COLORS.snow.clone();
+    c.copy(COLORS.snow);
   } else if (h > 98) {
-    c = COLORS.rock.clone().lerp(COLORS.forest, moisture * .42);
+    c.copy(COLORS.rock).lerp(COLORS.forest, moisture * .42);
   } else {
-    c = COLORS.grass.clone().lerp(COLORS.forest, moisture * .55);
+    c.copy(COLORS.grass).lerp(COLORS.forest, moisture * .55);
     if (patch > .6 && h < 45) c.lerp(COLORS.rice, .32);
   }
 
@@ -463,6 +539,7 @@ const terrainMaterial = new THREE.MeshStandardMaterial({
   metalness: .02
 });
 
+const chunkColor = new THREE.Color();
 function makeChunkGeometry(cx, cz, segments) {
   const geo = new THREE.PlaneGeometry(CONFIG.chunkSize, CONFIG.chunkSize, segments, segments);
   geo.rotateX(-Math.PI / 2);
@@ -472,12 +549,11 @@ function makeChunkGeometry(cx, cz, segments) {
     const x = cx + pos.getX(i);
     const z = cz + pos.getZ(i);
     const rawH = terrainHeight(x, z);
-    const h = visualTerrainHeight(x, z);
-    pos.setY(i, h);
-    const c = terrainColor(x, z, rawH);
-    colors[i * 3] = c.r;
-    colors[i * 3 + 1] = c.g;
-    colors[i * 3 + 2] = c.b;
+    pos.setY(i, visualTerrainHeight(x, z, rawH));
+    terrainColor(x, z, rawH, chunkColor);
+    colors[i * 3] = chunkColor.r;
+    colors[i * 3 + 1] = chunkColor.g;
+    colors[i * 3 + 2] = chunkColor.b;
   }
   geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   geo.computeVertexNormals();
@@ -516,10 +592,11 @@ function updateTerrainLOD(dt, force = false) {
   lodTimer -= dt;
   if (!force && lodTimer > 0) return;
   lodTimer = .3;
+  const nearDistance = CONFIG.lodNearDistance * CONFIG.lodNearDistance;
   for (const c of terrainChunks) {
     const dx = camera.position.x - c.x;
     const dz = camera.position.z - c.z;
-    const near = Math.sqrt(dx * dx + dz * dz) < CONFIG.lodNearDistance;
+    const near = dx * dx + dz * dz < nearDistance;
     c.high.visible = near;
     c.low.visible = !near;
   }
@@ -812,8 +889,38 @@ function addRoad(name, coords, width, type = 'asphalt', options = {}) {
   return road;
 }
 
+let roadQueryStamp = 0;
 function nearestRoad(x, z, padding = 0) {
   let best = null;
+  // Runtime queries are all inside this padding. The 3x3 lookup is enough
+  // because the index stores a 44 m margin around every segment.
+  if (roadSpatialIndex && padding <= 40) {
+    const { cell, cells } = roadSpatialIndex;
+    const ix = Math.floor(x / cell);
+    const iz = Math.floor(z / cell);
+    const stamp = ++roadQueryStamp;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dz = -1; dz <= 1; dz++) {
+        const list = cells.get(`${ix + dx}:${iz + dz}`);
+        if (!list) continue;
+        for (const s of list) {
+          if (s._queryStamp === stamp) continue;
+          s._queryStamp = stamp;
+          const vx = s.bx - s.ax;
+          const vz = s.bz - s.az;
+          const len2 = vx * vx + vz * vz || 1;
+          const t = clamp(((x - s.ax) * vx + (z - s.az) * vz) / len2, 0, 1);
+          const px = s.ax + vx * t;
+          const pz = s.az + vz * t;
+          const d = Math.hypot(x - px, z - pz);
+          if (d <= s.width / 2 + padding && (!best || d < best.dist)) {
+            best = { dist: d, width: s.width, type: s.type, name: s.name, x: px, z: pz, angle: Math.atan2(vx, vz), y: s.ay + (s.by - s.ay) * t };
+          }
+        }
+      }
+    }
+    return best;
+  }
   for (let i = 0; i < roadSegments.length; i++) {
     const s = roadSegments[i];
     const vx = s.bx - s.ax;
@@ -832,10 +939,11 @@ function nearestRoad(x, z, padding = 0) {
 
 let roadSpatialIndex = null;
 function buildRoadSpatialIndex() {
-  const cell = 28;
+  if (roadSpatialIndex) return;
+  const cell = 32;
   const cells = new Map();
   for (const s of roadSegments) {
-    const margin = s.width / 2 + 20;
+    const margin = s.width / 2 + 44;
     const minX = Math.floor((Math.min(s.ax, s.bx) - margin) / cell);
     const maxX = Math.floor((Math.max(s.ax, s.bx) + margin) / cell);
     const minZ = Math.floor((Math.min(s.az, s.bz) - margin) / cell);
@@ -876,8 +984,8 @@ function roadShelfAt(x, z) {
   return best;
 }
 
-function visualTerrainHeight(x, z) {
-  const h = terrainHeight(x, z);
+function visualTerrainHeight(x, z, baseHeight = null) {
+  const h = baseHeight == null ? terrainHeight(x, z) : baseHeight;
   const road = roadShelfAt(x, z);
   if (!road) return h;
   const edge = road.width / 2 + 1.8;
@@ -973,6 +1081,10 @@ function addElevatedRoad(name, coords, width, height, level) {
 addElevatedRoad('Neon Skyway', [[-500, 120], [-500, 260], [-500, 380], [-500, 500], [-500, 640]], 17, 16, 1);
 addElevatedRoad('Kai Loop Overpass', [[-760, 380], [-640, 380], [-500, 380], [-360, 380], [-260, 380]], 17, 28, 2);
 
+// Build once so scenery placement, terrain shelves and per-frame vehicle
+// queries do not have to scan every road segment.
+buildRoadSpatialIndex();
+
 // ---------------------------------------------------------------------------
 // City
 // ---------------------------------------------------------------------------
@@ -984,7 +1096,9 @@ function addTreeInstanceLater(x, z, scale = 1, type = 'sakura') {
 }
 
 const cityGroup = new THREE.Group();
-world.add(cityGroup);
+const sceneryGroup = new THREE.Group();
+const suburbGroup = new THREE.Group();
+world.add(cityGroup, sceneryGroup, suburbGroup);
 const colliders = [];
 const buildingMaterials = [
   new THREE.MeshStandardMaterial({ map: windowTexA, color: 0xffffff, emissive: 0x5d3d1e, emissiveIntensity: .14, roughness: .82, metalness: .08 }),
@@ -1026,7 +1140,7 @@ function addBuilding(x, z, w, d, h, materialIndex) {
   }
   colliders.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, kind: 'building' });
 
-  if (h > 24 && worldRandom() < .32) {
+  if (h > 34 && worldRandom() < .2) {
     const signText = pick(['ネオン', 'カイ', '夜', '走', '港', '山', 'OPEN', 'KAZE']);
     const signTex = makeLabelTexture(signText, '#fff8e8', 'rgba(10,14,18,.92)', pick(['#ff4b3e', '#66e6ff', '#ffd166']));
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(w * .55, 12), 3.1), new THREE.MeshBasicMaterial({ map: signTex, transparent: true, toneMapped: false }));
@@ -1069,15 +1183,12 @@ for (const b of blockCenters) {
     addPark(b.x, b.z);
     continue;
   }
-  const base = terrainHeight(b.x, b.z);
-  const counts = worldRandom() < .45 ? 2 : 1;
-  for (let i = 0; i < counts; i++) {
-    const w = rand(30, 55);
-    const d = rand(32, 58);
-    const h = rand(22, i === 0 ? 96 : 72);
-    const x = b.x + (i === 0 ? -18 : 20) + rand(-4, 4);
-    const z = b.z + rand(-8, 8);
-    addBuilding(x, z, w, d, h, (worldRandom() * 3) | 0);
+  if (worldRandom() < .52) {
+    const w = rand(24, 32);
+    addBuilding(b.x - 18 + rand(-1.5, 1.5), b.z + rand(-3, 3), w, rand(26, 42), rand(22, 96), (worldRandom() * 3) | 0);
+    addBuilding(b.x + 18 + rand(-1.5, 1.5), b.z + rand(-3, 3), w, rand(26, 42), rand(22, 72), (worldRandom() * 3) | 0);
+  } else {
+    addBuilding(b.x + rand(-3, 3), b.z + rand(-3, 3), rand(30, 46), rand(30, 48), rand(22, 96), (worldRandom() * 3) | 0);
   }
   const parklet = worldRandom() < .26;
   if (parklet) addTreeInstanceLater(b.x + rand(-25, 25), b.z + rand(-25, 25), rand(.7, 1), 'sakura');
@@ -1118,13 +1229,15 @@ function addCityLamp(x, z, rot = 0) {
   lamp.rotation.y = rot;
   cityGroup.add(lamp);
 }
+// Lamp posts sit beyond the curb, not on the driving line. The two avenues
+// are 18 m and 14 m wide, so offset each pole by its own sidewalk clearance.
 for (let x = -680; x <= -320; x += 120) {
-  addCityLamp(x, 380, Math.PI / 2);
-  addCityLamp(x, 280, Math.PI / 2);
+  addCityLamp(x + 3, 380 - 10.5, Math.PI / 2);
+  addCityLamp(x - 3, 280 + 8.5, Math.PI / 2);
 }
 for (let z = 210; z <= 560; z += 130) {
-  addCityLamp(-500, z, 0);
-  addCityLamp(-600, z, 0);
+  addCityLamp(-500 + 10.5, z, 0);
+  addCityLamp(-600 - 8.5, z, 0);
 }
 
 // Crosswalks at the central intersections.
@@ -1190,16 +1303,16 @@ const lighthouse = new THREE.Group();
 const rockBase = new THREE.Mesh(new THREE.DodecahedronGeometry(15, 0), new THREE.MeshStandardMaterial({ color: 0x555b58, roughness: .95 }));
 rockBase.scale.y = .42;
 rockBase.position.set(-930, 1, 610);
-world.add(rockBase);
+sceneryGroup.add(rockBase);
 const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 3.2, 16, 10), new THREE.MeshStandardMaterial({ color: 0xe1ded1, roughness: .72 }));
 tower.position.set(-930, 9, 610);
-world.add(tower);
+sceneryGroup.add(tower);
 const beacon = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.3, 2.4, 10), windowLitMat);
 beacon.position.set(-930, 18, 610);
-world.add(beacon);
+sceneryGroup.add(beacon);
 const cap = new THREE.Mesh(new THREE.ConeGeometry(2.7, 2.3, 10), new THREE.MeshStandardMaterial({ color: 0x293234, metalness: .5, roughness: .5 }));
 cap.position.set(-930, 20.3, 610);
-world.add(cap);
+sceneryGroup.add(cap);
 
 // A simple container ship silhouette out in the bay.
 const ship = new THREE.Group();
@@ -1208,15 +1321,23 @@ addBox(ship, -1065, 11, 390, 26, 18, 22, new THREE.MeshStandardMaterial({ color:
 for (let i = 0; i < 10; i++) {
   addBox(ship, -1000 + i * 12, 7, 390, 9, 5, 18, containerMats[i % containerMats.length]);
 }
-world.add(ship);
+sceneryGroup.add(ship);
 
 // ---------------------------------------------------------------------------
 // Suburbs and farm buildings
 // ---------------------------------------------------------------------------
+const houseBodyMats = new Map();
+const houseDoorMat = new THREE.MeshStandardMaterial({ color: 0x46352a, roughness: .9 });
+const barnBodyMat = new THREE.MeshStandardMaterial({ color: 0x7a3a2c, roughness: .93 });
+const barnDoorMat = new THREE.MeshStandardMaterial({ color: 0x30251e, roughness: .9 });
 function addHouse(x, z, scale = 1, color = 0xd8d1c1) {
   const base = terrainHeight(x, z);
   const group = new THREE.Group();
-  const bodyMat = new THREE.MeshStandardMaterial({ color, roughness: .9 });
+  let bodyMat = houseBodyMats.get(color);
+  if (!bodyMat) {
+    bodyMat = new THREE.MeshStandardMaterial({ color, roughness: .9 });
+    houseBodyMats.set(color, bodyMat);
+  }
   const body = new THREE.Mesh(boxGeo, bodyMat);
   body.scale.set(9 * scale, 5.4 * scale, 10 * scale);
   body.position.y = 2.7 * scale;
@@ -1225,7 +1346,7 @@ function addHouse(x, z, scale = 1, color = 0xd8d1c1) {
   roof.rotation.y = Math.PI / 4;
   roof.position.y = 6.9 * scale;
   group.add(roof);
-  const door = new THREE.Mesh(new THREE.PlaneGeometry(1.6 * scale, 2.7 * scale), new THREE.MeshStandardMaterial({ color: 0x46352a, roughness: .9 }));
+  const door = new THREE.Mesh(new THREE.PlaneGeometry(1.6 * scale, 2.7 * scale), houseDoorMat);
   door.position.set(0, 1.35 * scale, 5.06 * scale);
   group.add(door);
   const win = new THREE.Mesh(new THREE.PlaneGeometry(1.8 * scale, 1.3 * scale), windowLitMat);
@@ -1233,7 +1354,7 @@ function addHouse(x, z, scale = 1, color = 0xd8d1c1) {
   group.add(win);
   group.position.set(x, base, z);
   group.rotation.y = rand(-.4, .4);
-  world.add(group);
+  suburbGroup.add(group);
   colliders.push({ minX: x - 5 * scale, maxX: x + 5 * scale, minZ: z - 5.6 * scale, maxZ: z + 5.6 * scale, kind: 'house' });
 }
 
@@ -1243,6 +1364,7 @@ for (let attempt = 0; attempt < 220 && houseCount < 26; attempt++) {
   const z = rand(650, 960);
   if (nearestRoad(x, z, 9)) continue;
   if (cityMaskAt(x, z) > .05) continue;
+  if (isNearCollider(x, z, 9)) continue;
   addHouse(x, z, rand(.8, 1.2), pick([0xd8d1c1, 0xc9c5b9, 0xb7c1bc, 0xd2c0a8, 0xb2b8c7]));
   houseCount++;
 }
@@ -1251,6 +1373,7 @@ for (let attempt = 0; attempt < 140 && houseCount < 38; attempt++) {
   const z = rand(460, 700);
   if (nearestRoad(x, z, 8)) continue;
   if (cityMaskAt(x, z) > .1) continue;
+  if (isNearCollider(x, z, 8)) continue;
   addHouse(x, z, rand(.75, 1.05), pick([0xc9c2b2, 0xb5b1a6, 0xd6c8b1]));
   houseCount++;
 }
@@ -1258,8 +1381,7 @@ for (let attempt = 0; attempt < 140 && houseCount < 38; attempt++) {
 function addBarn(x, z, rot = 0) {
   const base = terrainHeight(x, z);
   const group = new THREE.Group();
-  const barnMat = new THREE.MeshStandardMaterial({ color: 0x7a3a2c, roughness: .93 });
-  const body = new THREE.Mesh(boxGeo, barnMat);
+  const body = new THREE.Mesh(boxGeo, barnBodyMat);
   body.scale.set(18, 9, 26);
   body.position.y = 4.5;
   group.add(body);
@@ -1267,12 +1389,12 @@ function addBarn(x, z, rot = 0) {
   roof.rotation.y = Math.PI / 4;
   roof.position.y = 12;
   group.add(roof);
-  const door = new THREE.Mesh(new THREE.PlaneGeometry(6, 7), new THREE.MeshStandardMaterial({ color: 0x30251e, roughness: .9 }));
+  const door = new THREE.Mesh(new THREE.PlaneGeometry(6, 7), barnDoorMat);
   door.position.set(0, 3.5, 13.05);
   group.add(door);
   group.position.set(x, base, z);
   group.rotation.y = rot;
-  world.add(group);
+  suburbGroup.add(group);
   colliders.push({ minX: x - 10, maxX: x + 10, minZ: z - 13, maxZ: z + 13, kind: 'barn' });
   return { x, z, y: base, rot };
 }
@@ -1291,15 +1413,15 @@ for (let i = 0; i < 7; i++) {
   const paddy = new THREE.Mesh(new THREE.PlaneGeometry(w, d), paddyMat);
   paddy.rotation.x = -Math.PI / 2;
   paddy.position.set(x, base + .06, z);
-  world.add(paddy);
+  sceneryGroup.add(paddy);
   for (let row = -2; row <= 2; row++) {
     const water = new THREE.Mesh(new THREE.PlaneGeometry(w - 5, 3.1), paddyWaterMat);
     water.rotation.x = -Math.PI / 2;
     water.position.set(x, base + .075, z + row * 5.5);
-    world.add(water);
+    sceneryGroup.add(water);
   }
   for (const side of [-1, 1]) {
-    addBox(world, x, base + .25, z + side * (d / 2 + .4), w + 2, .5, 1, stoneMat);
+    addBox(sceneryGroup, x, base + .25, z + side * (d / 2 + .4), w + 2, .5, 1, stoneMat);
   }
 }
 
@@ -1534,7 +1656,7 @@ function addTorii(x, z, rotation = 0, scale = 1) {
   group.position.set(x, base, z);
   group.rotation.y = rotation;
   group.scale.setScalar(scale);
-  world.add(group);
+  sceneryGroup.add(group);
   return group;
 }
 
@@ -1554,7 +1676,7 @@ function addStoneLantern(x, z, y, scale = 1) {
   group.add(cap);
   group.position.set(x, y, z);
   group.scale.setScalar(scale);
-  world.add(group);
+  sceneryGroup.add(group);
 }
 
 function addShrine(x, z, scale = 1) {
@@ -1575,7 +1697,7 @@ function addShrine(x, z, scale = 1) {
   group.add(door);
   group.position.set(x, base, z);
   group.scale.setScalar(scale);
-  world.add(group);
+  sceneryGroup.add(group);
   addTorii(x, z + 10 * scale, 0, .72 * scale);
   addStoneLantern(x - 8 * scale, z + 6 * scale, base, .8 * scale);
   addStoneLantern(x + 8 * scale, z + 6 * scale, base, .8 * scale);
@@ -1602,7 +1724,7 @@ function addHairpinSign(x, z, rotation = 0, text = 'HAIRPIN') {
   group.add(sign);
   group.position.set(x, base, z);
   group.rotation.y = rotation;
-  world.add(group);
+  sceneryGroup.add(group);
 }
 
 const hairpinSigns = [
@@ -1623,6 +1745,7 @@ for (const [x, z] of hairpinSigns) {
 
 // White roadside guide posts on the pass.
 const passRoad = roads.find((r) => r.name === 'Kurohana Pass');
+const guidePostMat = new THREE.MeshBasicMaterial({ color: 0xe4e2d3 });
 if (passRoad) {
   for (let i = 4; i < passRoad.points.length - 4; i += 3) {
     const p = passRoad.points[i];
@@ -1636,9 +1759,9 @@ if (passRoad) {
     for (const side of [-1, 1]) {
       const x = p.x + nx * side * (passRoad.width / 2 + 1.2);
       const z = p.z + nz * side * (passRoad.width / 2 + 1.2);
-      const post = new THREE.Mesh(new THREE.BoxGeometry(.12, .85, .12), new THREE.MeshBasicMaterial({ color: 0xe4e2d3 }));
+      const post = new THREE.Mesh(new THREE.BoxGeometry(.12, .85, .12), guidePostMat);
       post.position.set(x, terrainHeight(x, z) + .42, z);
-      world.add(post);
+      sceneryGroup.add(post);
     }
   }
 }
@@ -1651,10 +1774,10 @@ for (let i = 0; i < 16; i++) {
   const base = terrainHeight(x, z);
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(.12, .16, 7.5, 5), poleMat);
   pole.position.set(x, base + 3.75, z);
-  world.add(pole);
+  sceneryGroup.add(pole);
   const cross = new THREE.Mesh(new THREE.BoxGeometry(2.1, .12, .12), poleMat);
   cross.position.set(x, base + 6.6, z);
-  world.add(cross);
+  sceneryGroup.add(cross);
 }
 
 // A shallow highland river and three ponds break up the plains.
@@ -1677,7 +1800,7 @@ for (let i = 7; i < riverPoints.length - 4; i += 8) {
     rock.scale.set(s * 1.5, s * .6, s);
     rock.position.set(x, terrainHeight(x, z) + .2, z);
     rock.rotation.y = rand(0, 4);
-    world.add(rock);
+    sceneryGroup.add(rock);
   }
 }
 const pondData = [[-265, 85, 16], [-120, -25, 12], [-420, 160, 10]];
@@ -1686,7 +1809,7 @@ for (const [x, z, radius] of pondData) {
   const pond = new THREE.Mesh(new THREE.CircleGeometry(radius, 24), pondMat);
   pond.rotation.x = -Math.PI / 2;
   pond.position.set(x, terrainHeight(x, z) + .055, z);
-  world.add(pond);
+  sceneryGroup.add(pond);
 }
 // A little timber bridge over the river on the north farm track.
 {
@@ -1707,7 +1830,7 @@ for (const [x, z, radius] of pondData) {
   }
   bridge.position.set(p.x, terrainHeight(p.x, p.z) + .1, p.z);
   bridge.rotation.y = .2;
-  world.add(bridge);
+  sceneryGroup.add(bridge);
 }
 
 for (const name of Object.keys(treeData)) buildTreeType(name);
@@ -1716,7 +1839,8 @@ for (const name of Object.keys(treeData)) buildTreeType(name);
 // Activities, routes and collectibles
 // ---------------------------------------------------------------------------
 const activityGroup = new THREE.Group();
-world.add(activityGroup);
+const staticActivityGroup = new THREE.Group();
+world.add(activityGroup, staticActivityGroup);
 const activities = [];
 const races = [];
 const ramps = [];
@@ -1732,6 +1856,18 @@ const activityColors = {
   barn: '#f4f1e8',
   race: '#ff4b3e'
 };
+const gatePostMat = new THREE.MeshStandardMaterial({ color: 0x20282b, roughness: .55, metalness: .45 });
+const gateGlowMats = new Map();
+function gateGlowMaterial(color) {
+  let material = gateGlowMats.get(color);
+  if (!material) {
+    material = new THREE.MeshBasicMaterial({ color, toneMapped: false });
+    gateGlowMats.set(color, material);
+  }
+  return material;
+}
+const rampStripeLightMat = new THREE.MeshBasicMaterial({ color: 0xffd166, toneMapped: false });
+const rampStripeDarkMat = new THREE.MeshBasicMaterial({ color: 0x1d2224, toneMapped: false });
 const game = {
   xp: 0,
   chain: 0,
@@ -1763,8 +1899,8 @@ function registerActivity(activity) {
 function addGate(x, z, angle, width, label, color, height = 6.4) {
   const base = terrainHeight(x, z);
   const group = new THREE.Group();
-  const postMat = new THREE.MeshStandardMaterial({ color: 0x20282b, roughness: .55, metalness: .45 });
-  const glow = new THREE.MeshBasicMaterial({ color, toneMapped: false });
+  const postMat = gatePostMat;
+  const glow = gateGlowMaterial(color);
   for (const side of [-1, 1]) {
     const post = new THREE.Mesh(new THREE.BoxGeometry(.6, height, .6), postMat);
     post.position.set(side * width / 2, height / 2, 0);
@@ -1782,7 +1918,7 @@ function addGate(x, z, angle, width, label, color, height = 6.4) {
   group.add(sign);
   group.position.set(x, base, z);
   group.rotation.y = angle;
-  activityGroup.add(group);
+  staticActivityGroup.add(group);
   return group;
 }
 
@@ -1797,7 +1933,7 @@ function addSuspendedMarker(x, z, color, text) {
   const sprite = new THREE.Sprite(mat);
   sprite.position.set(x, base + 9, z);
   sprite.scale.set(7.5, 2.1, 1);
-  activityGroup.add(sprite);
+  staticActivityGroup.add(sprite);
   return sprite;
 }
 
@@ -1813,7 +1949,7 @@ for (const def of trapDefs) {
   const cameraBox = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.2, 1.2), new THREE.MeshStandardMaterial({ color: 0x2b3437, roughness: .45, metalness: .4 }));
   cameraBox.position.set(r.x + Math.cos(r.angle) * (r.width / 2 + 1.5), terrainHeight(r.x, r.z) + 5.5, r.z - Math.sin(r.angle) * (r.width / 2 + 1.5));
   cameraBox.rotation.y = r.angle;
-  activityGroup.add(cameraBox);
+  staticActivityGroup.add(cameraBox);
   registerActivity({ type: 'trap', name: def.name, x: r.x, z: r.z, angle: r.angle, best: 0, color: activityColors.trap });
 }
 
@@ -1867,7 +2003,7 @@ function buildRamp(x, z, angle, width, length, rise) {
       group.add(support);
     }
     for (let i = 0; i < 5; i++) {
-      const stripe = new THREE.Mesh(new THREE.BoxGeometry(.42, .82, .06), new THREE.MeshBasicMaterial({ color: i % 2 ? 0x1d2224 : 0xffd166, toneMapped: false }));
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(.42, .82, .06), i % 2 ? rampStripeDarkMat : rampStripeLightMat);
       stripe.position.set(side * (width / 2 + .01), rise * .62 + .45, -length / 2 + i * (length / 5) + .4);
       stripe.rotation.y = side * Math.PI / 2;
       group.add(stripe);
@@ -1881,7 +2017,7 @@ function buildRamp(x, z, angle, width, length, rise) {
   group.add(post);
   group.position.set(x, base, z);
   group.rotation.y = angle;
-  activityGroup.add(group);
+  staticActivityGroup.add(group);
   return { x, z, angle, width, length, rise, base };
 }
 
@@ -1994,26 +2130,33 @@ for (let i = 0; i < catTarget; i++) {
     catDefs.push([cx, cz]);
   }
 }
-for (const [x, z] of catDefs) {
-  const base = visualTerrainHeight(x, z);
-  const group = new THREE.Group();
+const catPrototype = new THREE.Group();
+{
   const body = new THREE.Mesh(catGeo, goldMat);
   body.scale.set(.55, .7, .48);
   body.position.y = .72;
-  group.add(body);
+  catPrototype.add(body);
   const head = new THREE.Mesh(catGeo, goldMat);
   head.scale.setScalar(.42);
   head.position.set(0, 1.35, .18);
-  group.add(head);
+  catPrototype.add(head);
   for (const side of [-1, 1]) {
     const ear = new THREE.Mesh(new THREE.ConeGeometry(.16, .38, 4), goldMat);
     ear.position.set(side * .22, 1.68, .18);
-    group.add(ear);
+    catPrototype.add(ear);
   }
   const tail = new THREE.Mesh(new THREE.TorusGeometry(.32, .07, 4, 8, Math.PI), goldMat);
   tail.position.set(.32, .9, -.2);
   tail.rotation.z = .5;
-  group.add(tail);
+  catPrototype.add(tail);
+  mergeStaticGroup(catPrototype);
+}
+const catBodyGeometry = catPrototype.children[0].geometry;
+for (const [x, z] of catDefs) {
+  const base = visualTerrainHeight(x, z);
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(catBodyGeometry, goldMat);
+  group.add(body);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(1.3, .04, 4, 24), new THREE.MeshBasicMaterial({ color: activityColors.collectible, transparent: true, opacity: .45, toneMapped: false }));
   ring.rotation.x = Math.PI / 2;
   ring.position.y = .15;
@@ -2030,13 +2173,13 @@ function addBarnFind(x, z, name, rotation = 0) {
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(8, 2.2), new THREE.MeshBasicMaterial({ map: makeLabelTexture('BARN FIND', '#fff7e5', 'rgba(20,16,11,.94)', '#f4f1e8'), transparent: true, side: THREE.DoubleSide, toneMapped: false }));
   sign.position.set(x, terrainHeight(x, z) + 4.2, z + 13);
   sign.rotation.y = rotation;
-  activityGroup.add(sign);
+  staticActivityGroup.add(sign);
   // A low covered silhouette under a tarp beside the barn.
   const tarp = new THREE.Mesh(new THREE.BoxGeometry(5.4, 1.1, 2.3), new THREE.MeshStandardMaterial({ color: 0x70878b, roughness: .92 }));
   tarp.position.set(x + 16, terrainHeight(x + 16, z) + .8, z);
   tarp.rotation.y = rotation;
   tarp.rotation.z = .08;
-  activityGroup.add(tarp);
+  staticActivityGroup.add(tarp);
   registerActivity({ type: 'barn', name, x, z, rotation, color: activityColors.barn });
 }
 addBarnFind(-640, -430, 'Kaze 2000 GT', .4);
@@ -2080,14 +2223,23 @@ addRace({
 });
 addRace({
   name: 'Minato Sprint', kind: 'Sprint',
-  start: [-500, 380],
-  checkpoints: [[-720, 380], [-800, 200], [-810, -100], [-800, -400], [-790, -700]]
+  start: [-795, 900],
+  checkpoints: [[-805, 650], [-800, 400], [-805, 150], [-810, -120], [-800, -420], [-790, -700]]
 });
 addRace({
   name: 'Kurohana Climb', kind: 'Point to point',
   start: [180, 600],
   checkpoints: [[360, 240], [420, 60], [260, -160], [460, 420], [700, -200], [920, 360], [1100, 400], [1140, 260]]
 });
+
+// All buildings, road surfaces, roadside props and fixed activity structures
+// are now complete. Bake them by material to cut hundreds of draw calls.
+mergeStaticGroup(roadGroup);
+mergeStaticGroup(cityGroup);
+mergeStaticGroup(harborGroup);
+mergeStaticGroup(suburbGroup);
+mergeStaticGroup(sceneryGroup);
+mergeStaticGroup(staticActivityGroup);
 
 const activityTotal = activities.length;
 
@@ -2280,6 +2432,7 @@ const car = {
   steer: 0,
   airborne: false,
   waterTime: 0,
+  terrainHeight: 0,
   cameraMode: 0,
   wheelSpin: 0
 };
@@ -2300,11 +2453,57 @@ function surfaceAt(x, z) {
     return { ...CONFIG.surfaces[road.type], type: road.type, name: road.name, road: true, width: road.width };
   }
   const h = terrainHeight(x, z);
-  if (cityMaskAt(x, z) > .32) return { ...CONFIG.surfaces.asphalt, type: 'asphalt', name: 'Neon Ward pavement', road: false };
-  if (h < .3 && x < -780) return { ...CONFIG.surfaces.water, type: 'water', name: 'Minato Bay', road: false };
-  if (h < 4.8 && x < -760) return { ...CONFIG.surfaces.sand, type: 'sand', name: 'Minato beach', road: false };
-  if (h > 168) return { ...CONFIG.surfaces.snow, type: 'snow', name: 'Yuki snowfield', road: false };
-  return { ...CONFIG.surfaces.grass, type: 'grass', name: 'Kai backcountry', road: false };
+  let surface;
+  if (cityMaskAt(x, z) > .32) surface = { ...CONFIG.surfaces.asphalt, type: 'asphalt', name: 'Neon Ward pavement', road: false };
+  else if (h < .3 && x < -780) surface = { ...CONFIG.surfaces.water, type: 'water', name: 'Minato Bay', road: false };
+  else if (h < 4.8 && x < -760) surface = { ...CONFIG.surfaces.sand, type: 'sand', name: 'Minato beach', road: false };
+  else if (h > 168) surface = { ...CONFIG.surfaces.snow, type: 'snow', name: 'Yuki snowfield', road: false };
+  else surface = { ...CONFIG.surfaces.grass, type: 'grass', name: 'Kai backcountry', road: false };
+  surface.terrainHeight = h;
+  return surface;
+}
+
+const terrainGradient = { x: 0, z: 0 };
+function terrainGradientAt(x, z, target) {
+  const e = 2.5;
+  target.x = (terrainHeight(x + e, z) - terrainHeight(x - e, z)) / (2 * e);
+  target.z = (terrainHeight(x, z + e) - terrainHeight(x, z - e)) / (2 * e);
+  return target;
+}
+
+function resolveTerrainBarrier(prevX, prevZ) {
+  const travel = Math.hypot(car.x - prevX, car.z - prevZ);
+  if (travel < .002) return;
+  if (!car.airborne) {
+    if (nearestRoad(car.x, car.z, 1.5)) return;
+    const rise = groundHeightAt(car.x, car.z) - car.groundY;
+    if (rise <= travel * CONFIG.maxClimbSlope) return;
+  } else if (groundHeightAt(car.x, car.z) <= car.y + .2) {
+    // A jump may clear a crest, but it must not pass through a rising face.
+    return;
+  }
+
+  car.x = prevX;
+  car.z = prevZ;
+  terrainGradientAt(prevX, prevZ, terrainGradient);
+  const gradientLength = Math.hypot(terrainGradient.x, terrainGradient.z);
+  if (gradientLength > .01) {
+    const nx = terrainGradient.x / gradientLength;
+    const nz = terrainGradient.z / gradientLength;
+    const intoSlope = car.vx * nx + car.vz * nz;
+    if (intoSlope > 0) {
+      car.vx -= nx * intoSlope;
+      car.vz -= nz * intoSlope;
+    }
+    const tx = -nz;
+    const tz = nx;
+    const slide = car.vx * tx + car.vz * tz;
+    car.vx = tx * slide * .8;
+    car.vz = tz * slide * .8;
+  } else {
+    car.vx *= .2;
+    car.vz *= .2;
+  }
 }
 
 function resolveCollisions() {
@@ -2332,6 +2531,7 @@ function resetCar(silent = false) {
   car.heading = road ? road.angle : CONFIG.spawn.heading;
   car.y = groundHeightAt(car.x, car.z);
   car.groundY = car.y;
+  car.terrainHeight = terrainHeight(car.x, car.z);
   car.vx = 0; car.vz = 0; car.vy = 0;
   car.airborne = false;
   car.waterTime = 0;
@@ -2345,6 +2545,8 @@ function updateCar(dt) {
   let right = { x: Math.cos(car.heading), z: -Math.sin(car.heading) };
   const speedAbs = Math.hypot(car.vx, car.vz);
   const surface = surfaceAt(car.x, car.z);
+  const prevX = car.x;
+  const prevZ = car.z;
   // Positive yaw turns toward local +X, which reads as screen-left from the chase camera.
   const steerTarget = (input.left ? 1 : 0) - (input.right ? 1 : 0);
   car.steer = damp(car.steer, steerTarget, 11, dt);
@@ -2372,6 +2574,7 @@ function updateCar(dt) {
     vF -= Math.abs(vF) * surface.drag * dt * .05;
     const slope = (groundHeightAt(car.x + fwd.x * 2, car.z + fwd.z * 2) - groundHeightAt(car.x - fwd.x * 2, car.z - fwd.z * 2)) / 4;
     vF -= 9.81 * slope * dt * .58;
+    if (!surface.road) vF -= Math.max(0, slope - .25) * 26 * dt;
     if (!throttle && !braking && speedAbs < 1.4) vF = 0;
     vF = clamp(vF, -18, maxSpeed);
 
@@ -2392,6 +2595,7 @@ function updateCar(dt) {
   resolveCollisions();
   car.x = clamp(car.x, -WORLD_HALF + 8, WORLD_HALF - 8);
   car.z = clamp(car.z, -WORLD_HALF + 8, WORLD_HALF - 8);
+  resolveTerrainBarrier(prevX, prevZ);
 
   const ground = groundHeightAt(car.x, car.z);
   const previousGround = car.groundY;
@@ -2419,7 +2623,8 @@ function updateCar(dt) {
     }
   }
 
-  const ocean = terrainHeight(car.x, car.z) < -.5 && car.x < -780;
+  car.terrainHeight = terrainHeight(car.x, car.z);
+  const ocean = car.terrainHeight < -.5 && car.x < -780;
   if (ocean && car.y < .8) {
     car.waterTime += dt;
     car.vx *= .94;
@@ -2457,7 +2662,7 @@ function updateCar(dt) {
   carRoot.rotation.z = damp(carRoot.rotation.z, targetRoll, 7, dt);
   carRoot.position.set(car.x, car.y, car.z);
 
-  carShadow.position.set(car.x, groundHeightAt(car.x, car.z) + .025, car.z);
+  carShadow.position.set(car.x, ground + .025, car.z);
   carShadow.rotation.z = -car.heading;
   carShadow.material.opacity = car.airborne ? .18 : .42;
 
@@ -2466,6 +2671,8 @@ function updateCar(dt) {
   brakeMat.emissiveIntensity = .4 + (input.down || handbrake ? 2.2 : 0);
 }
 
+const cameraDesired = new THREE.Vector3();
+const cameraLook = new THREE.Vector3();
 function updateCamera(dt) {
   const fwd = { x: Math.sin(car.heading), z: Math.cos(car.heading) };
   const speed = car.speed;
@@ -2481,16 +2688,38 @@ function updateCamera(dt) {
     height = 1.18;
     lookAhead = 10;
   }
-  const desired = new THREE.Vector3(
+  const desired = cameraDesired.set(
     car.x - fwd.x * distance,
     car.y + height,
     car.z - fwd.z * distance
   );
+  if (car.cameraMode !== 2) {
+    const originX = car.x;
+    const originY = car.y + 1.45;
+    const originZ = car.z;
+    let safeT = 1;
+    for (let i = 1; i <= 6; i++) {
+      const t = i / 6;
+      const sx = lerp(originX, desired.x, t);
+      const sz = lerp(originZ, desired.z, t);
+      const sy = lerp(originY, desired.y, t);
+      if (terrainHeight(sx, sz) + 1.05 > sy) {
+        safeT = Math.max(.2, (i - 1) / 6);
+        break;
+      }
+    }
+    if (safeT < 1) {
+      desired.x = lerp(originX, desired.x, safeT);
+      desired.y = lerp(originY, desired.y, safeT);
+      desired.z = lerp(originZ, desired.z, safeT);
+      desired.y = Math.max(desired.y, visualTerrainHeight(desired.x, desired.z) + 1.2);
+    }
+  }
   const floor = visualTerrainHeight(desired.x, desired.z) + 1.15;
   if (desired.y < floor) desired.y = floor;
   const rate = car.cameraMode === 2 ? 22 : 5.5;
   camera.position.lerp(desired, 1 - Math.exp(-rate * dt));
-  const look = new THREE.Vector3(
+  const look = cameraLook.set(
     car.x + fwd.x * lookAhead,
     car.y + (car.cameraMode === 2 ? 1.15 : 1.5),
     car.z + fwd.z * lookAhead
@@ -2527,7 +2756,10 @@ const sunDir = new THREE.Vector3();
 const tempTop = new THREE.Color();
 const tempHorizon = new THREE.Color();
 const tempColor = new THREE.Color();
+const MAP_BASE_SIZE = 512;
+const MAP_ROAD_SIZE = 1100;
 let mapBase = null;
+let mapRoadLayer = null;
 let mapOpen = false;
 let toastTimer = 0;
 let lastMapDraw = 0;
@@ -2628,7 +2860,7 @@ function updateEnvironment(dt) {
   ambient.intensity = .2 + dayT * .3;
   scene.fog.color.copy(tempHorizon);
 
-  const altitude = terrainHeight(car.x, car.z);
+  const altitude = car.terrainHeight;
   let fogFar = CONFIG.drawDistance + dayT * 180;
   let fogNear = 220;
   if (game.weather === 'rain') { fogFar = 720; fogNear = 130; }
@@ -2658,84 +2890,193 @@ function updateEnvironment(dt) {
 // ---------------------------------------------------------------------------
 // Map
 // ---------------------------------------------------------------------------
+function mapTerrainColor(out, h, x, z, shade) {
+  if (h < -.2) {
+    const depth = clamp(-h / 42, 0, 1);
+    out.r = lerp(28, 5, depth);
+    out.g = lerp(76, 23, depth);
+    out.b = lerp(91, 35, depth);
+    return out;
+  }
+  let r, g, b;
+  if (h < 1.3) {
+    const t = smoothstep(-.2, 1.3, h);
+    r = lerp(185, 117, t); g = lerp(188, 139, t); b = lerp(151, 92, t);
+  } else if (h < 5) {
+    const t = smoothstep(1.2, 5, h);
+    r = lerp(117, 103, t); g = lerp(139, 125, t); b = lerp(92, 69, t);
+  } else if (h > 205) {
+    r = 226; g = 235; b = 235;
+  } else if (h > 166) {
+    const t = smoothstep(166, 220, h);
+    r = lerp(151, 222, t); g = lerp(158, 232, t); b = lerp(150, 233, t);
+  } else if (h > 105) {
+    const t = smoothstep(105, 176, h);
+    r = lerp(91, 137, t); g = lerp(111, 135, t); b = lerp(84, 119, t);
+  } else {
+    const moisture = noise2(x * .0075 + 4, z * .0075 - 7);
+    const patch = noise2(x * .021 - 11, z * .021 + 5);
+    r = lerp(112, 52, moisture * .7);
+    g = lerp(133, 82, moisture * .7);
+    b = lerp(76, 54, moisture * .7);
+    if (patch > .6 && h < 46) { r = lerp(r, 121, .24); g = lerp(g, 143, .24); b = lerp(b, 75, .24); }
+  }
+  const city = cityMaskAt(x, z);
+  if (city > 0) {
+    r = lerp(r, 97, city * .76);
+    g = lerp(g, 105, city * .76);
+    b = lerp(b, 99, city * .76);
+  }
+  if (h < 1.4) {
+    r = lerp(r, 186, .25);
+    g = lerp(g, 190, .25);
+    b = lerp(b, 157, .25);
+  }
+  out.r = clamp(r * shade, 0, 255);
+  out.g = clamp(g * shade, 0, 255);
+  out.b = clamp(b * shade, 0, 255);
+  return out;
+}
+
+function traceMapRoad(ctx, points, size) {
+  ctx.beginPath();
+  points.forEach((point, index) => {
+    const px = (point.x + WORLD_HALF) / CONFIG.worldSize * size;
+    const py = (point.z + WORLD_HALF) / CONFIG.worldSize * size;
+    if (index === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  });
+}
+
+function buildMapRoadLayer() {
+  const size = MAP_ROAD_SIZE;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const scale = size / CONFIG.worldSize;
+  const sorted = [...roads].sort((a, b) => a.width - b.width);
+  const colors = { asphalt: '#d7d8cc', gravel: '#c8b28b', dirt: '#bc9160', snow: '#edf7f7' };
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // Every casing first, then every fill. Intersections read as one clean road
+  // network instead of a pile of overlapping strokes.
+  for (const road of sorted) {
+    traceMapRoad(ctx, road.points, size);
+    ctx.strokeStyle = 'rgba(7,13,15,.82)';
+    ctx.lineWidth = Math.max(3.2, road.width * scale * 1.45 + 3.1);
+    ctx.stroke();
+  }
+  for (const road of sorted) {
+    traceMapRoad(ctx, road.points, size);
+    ctx.strokeStyle = colors[road.type] || colors.asphalt;
+    ctx.lineWidth = Math.max(2.1, road.width * scale * 1.45);
+    ctx.stroke();
+  }
+
+  ctx.setLineDash([10, 13]);
+  ctx.strokeStyle = 'rgba(41,48,45,.38)';
+  ctx.lineWidth = 1.15;
+  for (const road of sorted) {
+    if (road.type !== 'asphalt' || road.width < 12 || road.name.includes('Neon Ward')) continue;
+    traceMapRoad(ctx, road.points, size);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  for (const road of elevatedRoads) {
+    traceMapRoad(ctx, road.points, size);
+    ctx.setLineDash([11, 7]);
+    ctx.strokeStyle = 'rgba(239,244,235,.88)';
+    ctx.lineWidth = Math.max(2, road.width * scale * 1.05);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  mapRoadLayer = canvas;
+}
+
 function buildMapBase() {
-  const size = 400;
+  const size = MAP_BASE_SIZE;
+  const stride = size + 1;
+  const step = CONFIG.worldSize / size;
+  const heights = new Float32Array(stride * stride);
+  for (let py = 0; py <= size; py++) {
+    const z = -WORLD_HALF + py * step;
+    for (let px = 0; px <= size; px++) {
+      const x = -WORLD_HALF + px * step;
+      heights[py * stride + px] = terrainHeight(x, z);
+    }
+  }
+
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d');
   const img = ctx.createImageData(size, size);
+  const out = { r: 0, g: 0, b: 0 };
   for (let py = 0; py < size; py++) {
-    const z = -WORLD_HALF + (py + .5) / size * CONFIG.worldSize;
+    const row = py * stride;
+    const z = -WORLD_HALF + (py + .5) * step;
     for (let px = 0; px < size; px++) {
-      const x = -WORLD_HALF + (px + .5) / size * CONFIG.worldSize;
-      const h = terrainHeight(x, z);
-      let c;
-      if (h < -.15) {
-        const depth = clamp(-h / 24, 0, 1);
-        c = new THREE.Color(0x1b4a59).lerp(new THREE.Color(0x0b2633), depth);
-      } else {
-        c = terrainColor(x, z, h);
-        const shade = clamp(.78 + h / 520, .74, 1.1);
-        c = c.clone().multiplyScalar(shade);
-      }
+      const h = heights[row + px];
+      const hL = heights[row + Math.max(0, px - 1)];
+      const hR = heights[row + Math.min(size, px + 1)];
+      const hD = heights[Math.max(0, py - 1) * stride + px];
+      const hU = heights[Math.min(size, py + 1) * stride + px];
+      const nx = (hL - hR) / (2 * step);
+      const nz = (hD - hU) / (2 * step);
+      const inv = 1 / Math.sqrt(nx * nx + 1 + nz * nz);
+      const light = (.55 * nx + .76 + .35 * nz) * inv;
+      const shade = clamp(.64 + light * .48, .5, 1.16);
+      const x = -WORLD_HALF + (px + .5) * step;
+      mapTerrainColor(out, h, x, z, shade);
       const i = (py * size + px) * 4;
-      img.data[i] = c.r * 255;
-      img.data[i + 1] = c.g * 255;
-      img.data[i + 2] = c.b * 255;
+      img.data[i] = out.r;
+      img.data[i + 1] = out.g;
+      img.data[i + 2] = out.b;
       img.data[i + 3] = 255;
     }
   }
   ctx.putImageData(img, 0, 0);
+
   ctx.save();
   ctx.lineCap = 'round';
-  ctx.strokeStyle = '#2f7180';
-  ctx.lineWidth = Math.max(1.2, 13 / CONFIG.worldSize * size * 2.2);
-  ctx.beginPath();
-  riverPoints.forEach((p, i) => {
-    const px = (p.x + WORLD_HALF) / CONFIG.worldSize * size;
-    const py = (p.z + WORLD_HALF) / CONFIG.worldSize * size;
-    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-  });
+  ctx.lineJoin = 'round';
+  const riverWidth = Math.max(2.2, 13 / CONFIG.worldSize * size * 2.1);
+  ctx.strokeStyle = 'rgba(7,34,41,.62)';
+  ctx.lineWidth = riverWidth + 2.2;
+  traceMapRoad(ctx, riverPoints, size);
+  ctx.stroke();
+  ctx.strokeStyle = '#3f8690';
+  ctx.lineWidth = riverWidth;
+  traceMapRoad(ctx, riverPoints, size);
   ctx.stroke();
   for (const [x, z, radius] of pondData) {
     const px = (x + WORLD_HALF) / CONFIG.worldSize * size;
     const py = (z + WORLD_HALF) / CONFIG.worldSize * size;
+    const r = Math.max(2.2, radius / CONFIG.worldSize * size * 2.1);
     ctx.beginPath();
-    ctx.arc(px, py, Math.max(1.2, radius / CONFIG.worldSize * size * 2.2), 0, Math.PI * 2);
-    ctx.fillStyle = '#3f7b83';
+    ctx.arc(px, py, r + 1.4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(7,34,41,.6)';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#3f8690';
     ctx.fill();
   }
-  ctx.save();
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.fillStyle = 'rgba(17,22,23,.22)';
-  ctx.fillRect((CITY.x - CITY.width / 2 + WORLD_HALF) / CONFIG.worldSize * size, (CITY.z - CITY.depth / 2 + WORLD_HALF) / CONFIG.worldSize * size, CITY.width / CONFIG.worldSize * size, CITY.depth / CONFIG.worldSize * size);
-  for (const road of roads) {
-    ctx.strokeStyle = road.type === 'dirt' ? '#9b7956' : road.type === 'gravel' ? '#ae9a7d' : road.type === 'snow' ? '#d7e1e1' : '#a8aaa2';
-    ctx.lineWidth = Math.max(1.1, road.width / CONFIG.worldSize * size * 2.4);
-    ctx.beginPath();
-    road.points.forEach((p, i) => {
-      const px = (p.x + WORLD_HALF) / CONFIG.worldSize * size;
-      const py = (p.z + WORLD_HALF) / CONFIG.worldSize * size;
-      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-    });
-    ctx.stroke();
-  }
-  for (const road of elevatedRoads) {
-    ctx.strokeStyle = 'rgba(222,230,228,.75)';
-    ctx.lineWidth = Math.max(.5, road.width / CONFIG.worldSize * size * 1.2);
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    road.points.forEach((p, i) => {
-      const px = (p.x + WORLD_HALF) / CONFIG.worldSize * size;
-      const py = (p.z + WORLD_HALF) / CONFIG.worldSize * size;
-      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-    });
-    ctx.stroke();
-  }
+
+  const cityX = (CITY.x - CITY.width / 2 + WORLD_HALF) / CONFIG.worldSize * size;
+  const cityY = (CITY.z - CITY.depth / 2 + WORLD_HALF) / CONFIG.worldSize * size;
+  const cityW = CITY.width / CONFIG.worldSize * size;
+  const cityH = CITY.depth / CONFIG.worldSize * size;
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(240,224,179,.32)';
+  ctx.lineWidth = 1.4;
+  ctx.strokeRect(cityX, cityY, cityW, cityH);
   ctx.restore();
   mapBase = canvas;
+  buildMapRoadLayer();
 }
 
 function mapPoint(x, z, size) {
@@ -2745,14 +3086,107 @@ function mapPoint(x, z, size) {
   };
 }
 
+const mapLabels = [
+  { text: 'MINATO BAY', x: -1030, z: 710, size: 19, color: 'rgba(143,201,211,.7)', rot: -1.42 },
+  { text: 'MINATO HARBOR', x: -848, z: 270, size: 15, color: 'rgba(231,231,211,.64)', rot: -1.5 },
+  { text: 'NEON WARD', x: -500, z: 405, size: 17, color: 'rgba(255,224,165,.78)' },
+  { text: 'HOSHINO PLAINS', x: -250, z: -85, size: 19, color: 'rgba(235,236,214,.58)' },
+  { text: 'SAKURA SUBURBS', x: -570, z: 825, size: 16, color: 'rgba(235,227,204,.58)' },
+  { text: 'KUROHANA PASS', x: 650, z: 150, size: 18, color: 'rgba(236,236,218,.68)', rot: -.42 },
+  { text: 'YUKI ALPINE', x: 1010, z: -280, size: 18, color: 'rgba(232,244,244,.74)', rot: -1.12 }
+];
+
+function drawMapLabels(ctx, size) {
+  const scale = size / MAP_ROAD_SIZE;
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (const label of mapLabels) {
+    const p = mapPoint(label.x, label.z, size);
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(label.rot || 0);
+    ctx.font = `800 ${Math.round(label.size * scale)}px Segoe UI, Arial, sans-serif`;
+    ctx.lineWidth = Math.max(2, 4 * scale);
+    ctx.strokeStyle = 'rgba(5,12,14,.72)';
+    ctx.strokeText(label.text, 0, 0);
+    ctx.fillStyle = label.color;
+    ctx.fillText(label.text, 0, 0);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function drawMapChrome(ctx, size) {
+  const scale = size / MAP_ROAD_SIZE;
+  const margin = Math.max(26, 42 * scale);
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const compassX = size - margin;
+  const compassY = margin;
+  const radius = Math.max(16, 24 * scale);
+  ctx.beginPath();
+  ctx.arc(compassX, compassY, radius + 5 * scale, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(5,12,14,.55)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(236,241,229,.3)';
+  ctx.lineWidth = Math.max(1, 1.4 * scale);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,248,230,.86)';
+  ctx.font = `800 ${Math.round(15 * scale)}px Segoe UI, Arial, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('N', compassX, compassY - radius + 1);
+  ctx.fillStyle = 'rgba(255,209,102,.92)';
+  ctx.beginPath();
+  ctx.moveTo(compassX, compassY - radius * .62);
+  ctx.lineTo(compassX - 4 * scale, compassY + 2 * scale);
+  ctx.lineTo(compassX + 4 * scale, compassY + 2 * scale);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = 'rgba(238,243,233,.46)';
+  ctx.font = `700 ${Math.round(9 * scale)}px Segoe UI, Arial, sans-serif`;
+  ctx.fillText('E', compassX + radius - 2, compassY + 1);
+  ctx.fillText('W', compassX - radius + 2, compassY + 1);
+
+  const barMeters = 400;
+  const barLength = barMeters / CONFIG.worldSize * size;
+  const barX = margin;
+  const barY = size - margin;
+  ctx.fillStyle = 'rgba(5,11,13,.52)';
+  ctx.fillRect(barX - 9 * scale, barY - 25 * scale, barLength + 18 * scale, 31 * scale);
+  ctx.strokeStyle = 'rgba(238,243,231,.82)';
+  ctx.lineWidth = Math.max(1.4, 2.4 * scale);
+  ctx.beginPath();
+  ctx.moveTo(barX, barY);
+  ctx.lineTo(barX + barLength, barY);
+  ctx.moveTo(barX, barY - 4 * scale);
+  ctx.lineTo(barX, barY + 4 * scale);
+  ctx.moveTo(barX + barLength, barY - 4 * scale);
+  ctx.lineTo(barX + barLength, barY + 4 * scale);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(238,243,231,.78)';
+  ctx.textAlign = 'center';
+  ctx.font = `700 ${Math.round(10 * scale)}px Segoe UI, Arial, sans-serif`;
+  ctx.fillText(`${barMeters} m`, barX + barLength / 2, barY - 10 * scale);
+  ctx.restore();
+}
+
 function drawMarker(ctx, a, size, full = false) {
   const p = mapPoint(a.x, a.z, size);
   const color = a.color || activityColors[a.type] || '#fff';
+  const r = full ? (a.type === 'race' ? 7.4 : 4.8) : (a.type === 'race' ? 4.2 : 2.8);
+  ctx.globalAlpha = a.done ? .3 : 1;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, r + (full ? 3 : 1.8), 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(3,9,11,.62)';
+  ctx.fill();
   ctx.globalAlpha = a.done ? .3 : .96;
   ctx.fillStyle = color;
-  ctx.strokeStyle = 'rgba(4,10,12,.7)';
-  ctx.lineWidth = full ? 1.4 : 1.2;
-  const r = full ? (a.type === 'race' ? 8 : 5.5) : (a.type === 'race' ? 4.5 : 3);
+  ctx.strokeStyle = 'rgba(245,243,228,.8)';
+  ctx.lineWidth = full ? 1.3 : .9;
   if (a.type === 'race') {
     ctx.beginPath();
     ctx.rect(p.x - r, p.y - r, r * 2, r * 2);
@@ -2774,11 +3208,15 @@ function drawMarker(ctx, a, size, full = false) {
     ctx.stroke();
   }
   if (full && a.type === 'race') {
-    ctx.globalAlpha = a.done ? .35 : .9;
-    ctx.fillStyle = '#fff7e7';
-    ctx.font = '700 14px Segoe UI, Arial, sans-serif';
+    ctx.globalAlpha = a.done ? .35 : .95;
+    ctx.font = '700 19px Segoe UI, Arial, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(a.name, p.x + 13, p.y + 5);
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(4,10,12,.82)';
+    ctx.strokeText(a.name, p.x + 16, p.y + 1);
+    ctx.fillStyle = '#fff7e7';
+    ctx.fillText(a.name, p.x + 16, p.y + 1);
   }
   ctx.globalAlpha = 1;
 }
@@ -2810,9 +3248,10 @@ function drawMinimap() {
   const size = ui.minimap.width;
   ctx.clearRect(0, 0, size, size);
   ctx.drawImage(mapBase, 0, 0, size, size);
+  if (mapRoadLayer) ctx.drawImage(mapRoadLayer, 0, 0, size, size);
   for (const a of activities) drawMarker(ctx, a, size, false);
   drawPlayer(ctx, size, false);
-  ctx.strokeStyle = 'rgba(255,255,255,.12)';
+  ctx.strokeStyle = 'rgba(255,255,255,.14)';
   ctx.lineWidth = 2;
   ctx.strokeRect(1, 1, size - 2, size - 2);
 }
@@ -2823,19 +3262,12 @@ function drawFullMap() {
   const size = ui.mapCanvas.width;
   ctx.clearRect(0, 0, size, size);
   ctx.drawImage(mapBase, 0, 0, size, size);
-  for (const a of activities) drawMarker(ctx, a, size, true);
+  if (mapRoadLayer) ctx.drawImage(mapRoadLayer, 0, 0, size, size);
+  drawMapLabels(ctx, size);
+  for (const a of activities) if (a.type !== 'race') drawMarker(ctx, a, size, true);
+  for (const a of activities) if (a.type === 'race') drawMarker(ctx, a, size, true);
   drawPlayer(ctx, size, true);
-  ctx.fillStyle = 'rgba(255,248,230,.8)';
-  ctx.font = '800 16px Segoe UI, Arial, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('N', size / 2, 26);
-  ctx.fillStyle = 'rgba(255,248,230,.4)';
-  ctx.beginPath();
-  ctx.moveTo(size / 2, 11);
-  ctx.lineTo(size / 2 - 5, 19);
-  ctx.lineTo(size / 2 + 5, 19);
-  ctx.closePath();
-  ctx.fill();
+  drawMapChrome(ctx, size);
 }
 
 function drawCompass() {
@@ -2929,6 +3361,7 @@ function startRace(race) {
   car.heading = race.start.angle;
   car.y = groundHeightAt(car.x, car.z);
   car.groundY = car.y;
+  car.terrainHeight = terrainHeight(car.x, car.z);
   car.vx = 0; car.vz = 0; car.vy = 0;
   car.airborne = false;
   carRoot.position.set(car.x, car.y, car.z);
@@ -3143,11 +3576,11 @@ function updateHud(dt) {
   ui.gear.textContent = forwardSpeed < -.5 ? 'R' : car.speed < .6 ? 'N' : String(Math.min(6, 1 + Math.floor(car.speed / 13)));
   ui.rpm.style.width = `${clamp(car.speed / CONFIG.car.maxSpeed, 0, 1.18) * 100}%`;
   ui.drift.classList.toggle('on', car.slip > .17 && car.speed > 8);
-  ui.area.textContent = regionAt(car.x, car.z);
+  ui.area.textContent = regionAt(car.x, car.z, car.terrainHeight);
   ui.clock.textContent = formatClock(game.time);
   ui.weather.textContent = weatherName(game.weather);
   ui.weatherShort.textContent = weatherName(game.weather) + ' skies';
-  ui.altitude.textContent = `${Math.max(0, Math.round(terrainHeight(car.x, car.z)))} m`;
+  ui.altitude.textContent = `${Math.max(0, Math.round(car.terrainHeight))} m`;
   ui.score.textContent = Math.round(game.xp).toLocaleString();
   ui.rank.textContent = rankFor(game.xp);
   ui.combo.textContent = `x${game.multiplier.toFixed(1)}`;
@@ -3164,7 +3597,7 @@ function updateHud(dt) {
   game.compassTick += dt;
   if (game.compassTick > .1) { drawCompass(); game.compassTick = 0; }
   game.mapTick += dt;
-  if (game.mapTick > .12) { drawMinimap(); game.mapTick = 0; }
+  if (!game.mapOpen && game.mapTick > .12) { drawMinimap(); game.mapTick = 0; }
   if (game.mapOpen && game.elapsed - lastMapDraw > .35) {
     drawFullMap();
     lastMapDraw = game.elapsed;
@@ -3275,6 +3708,7 @@ async function boot() {
       car.x = x; car.z = z; car.heading = heading;
       car.vx = 0; car.vz = 0; car.vy = 0; car.airborne = false;
       car.y = groundHeightAt(x, z); car.groundY = car.y;
+      car.terrainHeight = terrainHeight(x, z);
       carRoot.position.set(x, car.y, z);
       carRoot.rotation.set(0, heading, 0);
       const f = { x: Math.sin(heading), z: Math.cos(heading) };
@@ -3309,6 +3743,7 @@ function animate() {
   updateCamera(dt);
   updateHud(dt);
   updateTerrainLOD(dt);
+  updateAdaptiveQuality(dt);
   renderer.render(scene, camera);
 }
 
