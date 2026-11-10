@@ -203,52 +203,10 @@ guide is due Thursday.
   </table>
 </div>
 
-## What's on the test — Friday, November 13
-
-Unit 3: Cellular Energy. Check each item off when you can explain it without your
-notes open.
-
-### ATP {#atp}
-
-- What ATP does, and why cells use it to do cellular work
-- ATP vs. ADP + P
-- How ATP transfers energy
-- Where the energy is stored
-
-### Photosynthesis — the big picture {#photosynthesis}
-
-- Autotroph vs. heterotroph
-- Inputs and outputs of photosynthesis
-- Write the chemical equation for photosynthesis
-- Plant pigments: the names and the colors of each
-- Label the parts of a chloroplast
-- Light reactions: what happens
-- Calvin cycle: what happens
-- Review handout 4-3, the photosynthesis notes, and the class drawings
-  (light dependent and light independent reactions)
-
-### Cellular respiration — the big picture {#cellular-respiration}
-
-- Inputs, outputs, and the chemical formula
-- Mitochondria structure
-- Glucose to ATP
-- Introduction to the three main phases
-- Glycolysis details
-- Krebs cycle details
-- Electron transport chain details
-- Review the cellular respiration notes and the drawings made together in class
-
-### Anaerobic respiration {#anaerobic-respiration}
-
-- Both fermentation types use glycolysis
-- Alcoholic fermentation
-- Lactic acid fermentation
-- Review the notes and the yeast lab
-
 ## Study calendar
 
 The same plan as a week you can follow one day at a time. Each task links to
-the part of this page that covers it. Monday is the class day that started it;
+the study notes below that cover it. Monday is the class day that started it;
 studying runs Tuesday through Friday morning, about 2 hours 40 minutes in total.
 
 <ol class="StudyCal" aria-label="Study calendar, November 9 to 13">
@@ -300,6 +258,164 @@ studying runs Tuesday through Friday morning, about 2 hours 40 minutes in total.
 
 Short on time? Do one 15-minute block: a flashcard pass, then one diagram from
 memory (chloroplast or mitochondria).
+
+## Study guide for Friday, November 13
+
+Unit 3: Cellular Energy. These notes cover every item on the test; the calendar
+above links to the section for each day's work.
+
+### ATP {#atp}
+
+**What ATP does.** ATP (adenosine triphosphate) is the cell's energy currency.
+Cells spend it on cellular work: chemical work (building molecules), transport
+work (pumping substances across membranes), and mechanical work (muscle
+contraction, cilia, moving cell parts).
+
+**ATP vs. ADP + P.** ATP has three phosphate groups; ADP has two. Taking off the
+last phosphate releases energy:
+
+`ATP → ADP + P + energy`
+
+Cellular respiration puts the phosphate back and stores energy again:
+
+`ADP + P + energy → ATP`
+
+**How ATP transfers energy.** The energy is in the phosphate bonds. When ATP is
+used, the terminal phosphate is transferred to another molecule
+(phosphorylation), giving that molecule the energy to react. The leftover ADP is
+recycled.
+
+**Where the energy is stored.** In the chemical bonds between the phosphate
+groups — especially the bond holding the third phosphate — not in the adenine or
+the ribose.
+
+### Photosynthesis — the big picture {#photosynthesis}
+
+**Autotroph vs. heterotroph.** Autotrophs make their own food using light
+(plants, algae, some bacteria). Heterotrophs cannot; they get energy by eating
+other organisms (animals, fungi).
+
+**Inputs and outputs.** In: carbon dioxide, water, light energy. Out: glucose,
+oxygen.
+
+**The equation.**
+
+`6CO2 + 6H2O + light energy → C6H12O6 + 6O2`
+
+carbon dioxide + water + light → glucose + oxygen
+
+**Plant pigments.** Pigments absorb some wavelengths and reflect others; the
+reflected light is the color you see. They sit in the thylakoid membranes.
+
+- Chlorophyll a — blue-green (the main pigment)
+- Chlorophyll b — yellow-green
+- Carotene — orange
+- Xanthophyll — yellow
+
+Chlorophyll reflects green light, which is why leaves look green.
+
+**Chloroplast parts.** Outer membrane, inner membrane, stroma (the fluid around
+the thylakoids), thylakoids (flattened discs), grana (stacks of thylakoids),
+thylakoid membrane (where the light reactions happen), and the thylakoid lumen
+(the space inside a thylakoid).
+
+#### Light reactions
+
+- Where: the thylakoid membranes.
+- Needs: light and water.
+- Water is split (photolysis) to replace the electrons chlorophyll loses, and
+  oxygen is released as a byproduct.
+- Light excites electrons in photosystem II; they travel the electron transport
+  chain to photosystem I.
+- Energy from the chain pumps H+ into the thylakoid lumen. H+ flows back through
+  ATP synthase, making ATP.
+- Photosystem I re-excites the electrons, which are passed to NADP+ to make
+  NADPH.
+- Products: ATP, NADPH, and O2. The ATP and NADPH go to the Calvin cycle.
+
+#### Calvin cycle (light independent)
+
+- Where: the stroma.
+- Uses: CO2, ATP, and NADPH. It does not use light directly.
+- CO2 is fixed by the enzyme RuBisCO and attached to a 5-carbon sugar (RuBP).
+- ATP and NADPH reduce the fixed carbon to G3P; two G3P build one glucose.
+- Products: glucose and other sugars; ADP and NADP+ return to the light
+  reactions.
+
+"Dark reactions" is another name for the Calvin cycle. They run whenever ATP and
+NADPH are available, not only at night.
+
+Review handout 4-3 and the chloroplast drawings from class.
+
+### Cellular respiration — the big picture {#cellular-respiration}
+
+**The equation.**
+
+`C6H12O6 + 6O2 → 6CO2 + 6H2O + ATP`
+
+glucose + oxygen → carbon dioxide + water + energy
+
+**Inputs and outputs.** In: glucose, oxygen. Out: carbon dioxide, water, ATP.
+
+**Mitochondria structure.** Outer membrane; inner membrane folded into cristae;
+matrix (the fluid inside the inner membrane); intermembrane space (between the
+two membranes). The Krebs cycle runs in the matrix, and the electron transport
+chain and ATP synthase sit in the inner membrane.
+
+**Glucose to ATP — the three phases.**
+
+1. Glycolysis — in the cytoplasm. Glucose splits into 2 pyruvate, with a net
+   gain of 2 ATP and 2 NADH.
+2. Krebs cycle — in the matrix. Pyruvate is broken down to CO2 and makes ATP,
+   NADH, and FADH2.
+3. Electron transport chain — in the inner membrane. NADH and FADH2 power the
+   chain; most of the ATP is made here, and oxygen becomes water.
+
+Per glucose, respiration makes about 36–38 ATP in most textbooks. Some sources
+use 32; use the number your teacher gives.
+
+#### Glycolysis details
+
+- Location: cytoplasm. No oxygen needed.
+- 2 ATP are used to start; 4 ATP are made; net gain is 2 ATP.
+- 2 NADH are produced.
+- Glucose (6C) → 2 pyruvate (3C).
+- Both aerobic respiration and fermentation begin with glycolysis.
+
+#### Krebs cycle details
+
+- Pyruvate enters the mitochondrion and is converted to acetyl-CoA, releasing
+  CO2 and making NADH.
+- Acetyl-CoA (2C) joins oxaloacetate (4C) to form citrate (6C).
+- Each turn: 3 NADH, 1 FADH2, 1 ATP, and 2 CO2.
+- Two turns per glucose, so the cycle plus the link reaction gives 6 NADH,
+  2 FADH2, 2 ATP, and 4 CO2 per glucose.
+- Location: the matrix.
+
+#### Electron transport chain details
+
+- Location: the inner mitochondrial membrane.
+- NADH and FADH2 drop electrons at the start of the chain; the electrons move
+  through protein complexes.
+- Energy from the electrons pumps H+ into the intermembrane space.
+- H+ flows back through ATP synthase, making ATP (chemiosmosis).
+- Oxygen is the final electron acceptor; it combines with H+ to form water.
+- Makes most of the ATP — about 32–34 per glucose.
+
+### Anaerobic respiration {#anaerobic-respiration}
+
+- Happens without oxygen. It starts with glycolysis, so it makes only the net
+  2 ATP from glycolysis.
+- Job: regenerate NAD+ so glycolysis can keep going.
+- Alcoholic fermentation: pyruvate → acetaldehyde + CO2 → ethanol + NAD+. Yeast
+  and some bacteria do this. The CO2 makes bread rise; the ethanol is the
+  alcohol in drinks.
+- Lactic acid fermentation: pyruvate → lactic acid + NAD+. Muscle cells during
+  hard exercise do this, and bacteria used in yogurt and cheese.
+- Both fermentation types use glycolysis; neither uses the Krebs cycle or the
+  electron transport chain.
+- Yeast lab: yeast plus sugar in warm water gives off CO2 bubbles (and ethanol),
+  which is evidence of alcoholic fermentation.
 
 ## Chapter 4 vocabulary {#vocabulary}
 
