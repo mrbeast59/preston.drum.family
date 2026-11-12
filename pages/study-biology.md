@@ -12,7 +12,8 @@ sitemap: false
 The week moves from aerobic respiration to anaerobic respiration, reviews
 photosynthesis and cellular respiration, then finishes with the Chapter 4 test.
 The Amoeba Sisters video is due Tuesday at the beginning of class, and the study
-guide is due Thursday.
+guide is due Thursday. The completed study guide — comparison table, diagram
+labels, and quick answers — is in the [study guide answer key](#answer-key).
 
 <style>
   .StudyWeek {
@@ -137,6 +138,32 @@ guide is due Thursday.
     outline: 2px solid #2f855a;
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  .StudyCompare table {
+    min-width: 46rem;
+    table-layout: fixed;
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+  .StudyCompare th:first-child {
+    width: 8rem;
+    white-space: normal;
+  }
+  .StudyCompare th,
+  .StudyCompare td {
+    padding: 0.55rem 0.6rem;
+  }
+
+  .StudyKey {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.35rem 1.5rem;
+    margin: 1rem 0 1.25rem;
+    padding-left: 1.35rem;
+  }
+  .StudyKey li {
+    break-inside: avoid;
   }
 </style>
 
@@ -416,6 +443,148 @@ use 32; use the number your teacher gives.
   electron transport chain.
 - Yeast lab: yeast plus sugar in warm water gives off CO2 bubbles (and ethanol),
   which is evidence of alcoholic fermentation.
+
+## Study guide answer key {#answer-key}
+
+The filled-in version of the Chapter 4 review guide. The notes above explain the
+why; use this section to check a blank guide or review the table and labels
+quickly. The detailed explanations are under [ATP](#atp),
+[photosynthesis](#photosynthesis), [cellular respiration](#cellular-respiration),
+and [anaerobic respiration](#anaerobic-respiration).
+
+### Four energy processes compared {#process-comparison}
+
+On a phone, swipe sideways inside the table to see both fermentation columns.
+
+<div class="StudyWeek StudyCompare">
+  <table>
+    <caption>Filled-in comparison</caption>
+    <thead>
+      <tr>
+        <th scope="col">Question</th>
+        <th scope="col">Photosynthesis</th>
+        <th scope="col">Aerobic cellular respiration</th>
+        <th scope="col">Lactic acid fermentation</th>
+        <th scope="col">Alcoholic fermentation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Reactants</th>
+        <td>Carbon dioxide, water, light energy</td>
+        <td>Glucose, oxygen</td>
+        <td>Glucose (pyruvate)</td>
+        <td>Glucose (pyruvate)</td>
+      </tr>
+      <tr>
+        <th scope="row">Products</th>
+        <td>Glucose, oxygen</td>
+        <td>Carbon dioxide, water, ATP</td>
+        <td>Lactic acid, ATP (2 net), NAD<sup>+</sup></td>
+        <td>Ethanol, carbon dioxide, ATP (2 net), NAD<sup>+</sup></td>
+      </tr>
+      <tr>
+        <th scope="row">Does this occur in humans?</th>
+        <td>No — plants, algae, and some bacteria</td>
+        <td>Yes</td>
+        <td>Yes — muscle cells</td>
+        <td>No — yeast and some bacteria</td>
+      </tr>
+      <tr>
+        <th scope="row">Where in the cell?</th>
+        <td>Chloroplast: thylakoid membranes (light reactions) and stroma (Calvin cycle)</td>
+        <td>Cytoplasm (glycolysis), mitochondrial matrix (Krebs), inner membrane (ETC)</td>
+        <td>Cytoplasm</td>
+        <td>Cytoplasm</td>
+      </tr>
+      <tr>
+        <th scope="row">Overall goal</th>
+        <td>Capture light energy and store it as glucose</td>
+        <td>Release energy from glucose and make ATP</td>
+        <td>Regenerate NAD<sup>+</sup> so glycolysis can continue; make 2 ATP without oxygen</td>
+        <td>Regenerate NAD<sup>+</sup> so glycolysis can continue; make 2 ATP, ethanol, and CO<sub>2</sub> without oxygen</td>
+      </tr>
+      <tr>
+        <th scope="row">How is oxygen involved?</th>
+        <td>Not used; produced when water is split</td>
+        <td>Used; final electron acceptor in the ETC, forming water</td>
+        <td>Not used (anaerobic)</td>
+        <td>Not used (anaerobic)</td>
+      </tr>
+      <tr>
+        <th scope="row">Impact on human life</th>
+        <td>Produces oxygen and food; the base of food chains</td>
+        <td>Main ATP supply for the body's cells</td>
+        <td>Lets muscles keep working during hard exercise; makes yogurt, cheese, and sourdough</td>
+        <td>Makes bread rise; used in beer and wine and in biofuels</td>
+      </tr>
+      <tr>
+        <th scope="row">Carbon dioxide is a product</th>
+        <td>No — CO<sub>2</sub> is a reactant</td>
+        <td>Yes — released in the Krebs cycle</td>
+        <td>No</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <th scope="row">How much ATP is produced?</th>
+        <td>No net ATP — the light reactions make ATP, but the Calvin cycle uses it</td>
+        <td>About 36–38 ATP per glucose (use your teacher's number)</td>
+        <td>2 ATP net per glucose</td>
+        <td>2 ATP net per glucose</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+### Photosynthesis diagram {#photosynthesis-diagram}
+
+The diagram links the two stages: the light reactions in the thylakoid
+membranes and the Calvin cycle in the stroma.
+
+<ol class="StudyKey">
+  <li>Sunlight (light energy)</li>
+  <li>Water (H<sub>2</sub>O)</li>
+  <li>Light-dependent reactions</li>
+  <li>Oxygen (O<sub>2</sub>)</li>
+  <li>ATP</li>
+  <li>NADPH</li>
+  <li>ADP + P</li>
+  <li>NADP<sup>+</sup></li>
+  <li>Carbon dioxide (CO<sub>2</sub>)</li>
+  <li>Calvin cycle (light-independent reactions)</li>
+  <li>Glucose (C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>)</li>
+</ol>
+
+**Light-dependent reactions.** Inputs: light and water (plus ADP, P, and NADP+
+recycled from the Calvin cycle). Outputs: ATP, NADPH, and oxygen.
+
+**Calvin cycle.** Inputs: carbon dioxide, ATP, and NADPH. Outputs: glucose (via
+G3P), ADP, P, and NADP+.
+
+**Where.** Light reactions: thylakoid membranes. Calvin cycle: stroma.
+
+### Chapter 4 review guide — quick answers {#review-guide-answers}
+
+- **What molecules do all cells use for energy?** ATP.
+- **ATP drawing.** Draw adenine and ribose, then a chain of three phosphate
+  groups. Label adenine, ribose, and the three phosphates; the bond holding the
+  third phosphate is the high-energy bond.
+- **How does ATP → ADP provide energy?** Breaking off the terminal phosphate
+  releases energy that the cell uses for work. The ADP and phosphate are
+  recycled.
+- **When is ADP + P → ATP?** During cellular respiration (and the light
+  reactions of photosynthesis), energy is used to reattach the phosphate.
+- **Energy diagram.** `ADP + P + energy → ATP` stores energy;
+  `ATP → ADP + P + energy` releases it.
+- **Autotroph.** Makes its own food from light or inorganic chemicals; example:
+  a plant or alga. Important because autotrophs produce food and oxygen and
+  form the base of food chains.
+- **Heterotroph.** Cannot make its own food; example: an animal or fungus. It
+  depends on autotrophs, directly or indirectly, for energy.
+- **Chloroplast sketch.** Label the outer membrane, inner membrane, stroma,
+  thylakoid, and granum; mark the thylakoid membranes as the light reactions and
+  the stroma as the Calvin cycle.
+- **Balanced equation.** `6CO2 + 6H2O + light energy → C6H12O6 + 6O2`.
 
 ## Label the diagrams {#labeling}
 

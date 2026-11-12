@@ -6,3 +6,13 @@
 .Page-content:has(#game-container) {
   max-width: unset;
 }
+
+/*
+ * Keep wide tables and diagrams from widening the page on narrow screens.
+ * .Page is a flex item, so it needs an explicit shrink allowance; the class
+ * week table and the labeling canvas then scroll inside their own wrappers.
+ */
+.Page {
+  max-width: 100%;
+  min-width: 0;
+}
