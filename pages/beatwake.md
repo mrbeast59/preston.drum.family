@@ -1,7 +1,7 @@
 ---
 layout: game
-short_title: " "
-title: ""
+short_title: " "
+title: "Beatwake - Rhythm Runner"
 permalink: /eea07153-c8c1-46d8-95c7-d13cc86e93d1
 ---
 
@@ -40,18 +40,22 @@ permalink: /eea07153-c8c1-46d8-95c7-d13cc86e93d1
   #bm{position:absolute;top:0;bottom:0;width:3px;background:#ff4fa3}
   #pt{font-size:26px}
   #at{font-size:15px;opacity:.9}
+  #flow{font-size:15px;font-weight:800;letter-spacing:.1em;color:#ffd34f;opacity:0;transform:translateY(-3px);transition:opacity .16s,transform .16s}
+  #flow.on{opacity:1;transform:none}
+  #beat{font-size:10px;font-weight:800;letter-spacing:.3em;color:#c9f8ed;opacity:.38;transition:opacity .08s,text-shadow .08s}
+  #beat.on{color:#ffd34f;opacity:1;text-shadow:0 0 12px #ffd34f}
   #toast{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:20;background:#ff4fa3;color:#1a0714;padding:8px 16px;border-radius:6px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none}
   #toast.on{opacity:1}
   @media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
 <div id="stage">
   <canvas id="g" width="1200" height="600" aria-label="Beatwake game area"></canvas>
-  <div id="hud" hidden><div id="pb"><i id="pf"></i><u id="bm"></u></div><span id="pt">0%</span><span id="at"></span></div>
+  <div id="hud" hidden><div id="pb"><i id="pf"></i><u id="bm"></u></div><span id="beat" aria-hidden="true">BEAT</span><span id="pt">0%</span><span id="at"></span><span id="flow" aria-live="polite"></span></div>
   <div id="toast" role="status" aria-live="polite"></div>
 
   <section id="home" class="ov" aria-label="Main menu">
     <h1 class="logo">BEATWAKE</h1>
-    <p class="sub">Jump to the beat. Space, click or tap to jump. Esc pauses, R restarts.</p>
+    <p class="sub">Jump to the beat. Space, click or tap to jump. Chain on-beat jumps to build Flow. Esc pauses, R restarts.</p>
     <button class="btn" data-go="levels">Play</button>
     <button class="btn alt" data-go="opts">Options</button>
   </section>
@@ -63,7 +67,7 @@ permalink: /eea07153-c8c1-46d8-95c7-d13cc86e93d1
       <button class="btn tg" id="prac" aria-pressed="false">Practice mode</button>
       <button class="btn alt" data-go="home">Back</button>
     </div>
-    <p class="sub">Practice drops a checkpoint at every beacon. X adds one, C removes one. Best runs only count outside practice.</p>
+    <p class="sub">Practice drops a checkpoint at every beacon. X adds one, C removes one. Best runs only count outside practice. Jump near the beat to build Flow.</p>
   </section>
 
   <section id="opts" class="ov" hidden aria-label="Options">
@@ -233,23 +237,24 @@ const AU={ctx:null,l:null,id:0,
   else if(n==='land')this.noise(B,t,.05,.15,300);
   else if(n==='die'){this.noise(B,t,.5,.6,200);this.tone(B,'sawtooth',300,t,.45,.3,40)}
   else if(n==='cp'){this.tone(B,'sine',880,t,.12,.25);this.tone(B,'sine',1320,t+.08,.2,.25)}
+  else if(n==='perfect'){[784,1175].forEach((f,i)=>this.tone(B,'triangle',f,t+i*.045,.16,.18))}
   else if(n==='win')[523,659,784,1047,1319].forEach((f,i)=>this.tone(B,'triangle',f,t+i*.09,.3,.25));
   else this.tone(B,'triangle',660,t,.06,.18)}};
 
 /* ---------- game state ---------- */
-let lv=null,S=null,cur=0,mode='menu',practice=false,cps=[],att=1,base=0,useA=false,phys=false,held=false,edge=false,evq=[],tD=0,tC=0,shk=0,fid=0,lastP=-1,lastA='',errShown=0,susT=0;
+let lv=null,S=null,cur=0,mode='menu',practice=false,cps=[],att=1,base=0,useA=false,phys=false,held=false,edge=false,evq=[],tD=0,tC=0,shk=0,fid=0,lastP=-1,lastA='',lastFlow=-1,flow=0,maxFlow=0,errShown=0,susT=0;
 const R={py:0,rot:0},parts=Array.from({length:260},()=>({x:0,y:0,vx:0,vy:0,life:0,max:1,sz:3,c:'#fff',g:0}));let pi=0;
 const clock=()=>useA?AU.ctx.currentTime:performance.now()/1000;
 const spark=(x,y,vx,vy,life,sz,c,g)=>{const p=parts[pi=(pi+1)%parts.length];p.x=x;p.y=y;p.vx=vx;p.vy=vy;p.life=p.max=life;p.sz=sz;p.c=c;p.g=g||0};
 function rebase(){useA=!!(AU.ctx&&AU.ctx.state==='running');base=clock()-S.n*DT;AU.play(lv,base,S.n)}
-function spawn(sn){S=sn?{...sn}:newState();R.py=S.y;R.rot=0;evq.length=0;held=phys;edge=false;mode='play';parts.forEach(p=>p.life=0);rebase()}
+function spawn(sn){S=sn?{...sn}:newState();R.py=S.y;R.rot=0;evq.length=0;held=phys;edge=false;mode='play';flow=0;lastFlow=-1;parts.forEach(p=>p.life=0);rebase()}
 function pct(){const x=S.n*DT*lv.spd;return lv.d.endless?Math.max(0,Math.floor(x/T)):Math.min(100,Math.max(0,Math.floor((x+PS)/lv.end*100)))}
 function rec(win){if(practice)return;const v=win?100:pct(),id=lv.d.id;if(v>(save.best[id]||0)){save.best[id]=v;persist()}}
-function start(i){cur=i;lv=build(LV[i],(Math.random()*1e9)|0);cps=[];att=1;save.tries[lv.d.id]=(save.tries[lv.d.id]||0)+1;persist();AU.init();hideAll();lastP=-1;lastA='';
+function start(i){cur=i;lv=build(LV[i],(Math.random()*1e9)|0);cps=[];att=1;flow=0;maxFlow=0;save.tries[lv.d.id]=(save.tries[lv.d.id]||0)+1;persist();AU.init();hideAll();lastP=-1;lastA='';
  const pb=$('#pb');pb.querySelectorAll('s').forEach(n=>n.remove());
  if(isFinite(lv.end))for(let k=1;k*128*T<lv.end;k++){const s=document.createElement('s');s.style.left=(k*128*T/lv.end*100)+'%';pb.append(s)}
  $('#bm').style.left=(lv.d.endless?-9:save.best[lv.d.id]||0)+'%';$('#hud').hidden=false;spawn(null)}
-function restart(){cps=[];att++;lastP=-1;spawn(null)}
+function restart(){cps=[];att++;maxFlow=0;lastP=-1;spawn(null)}
 function retry(){att++;spawn(practice&&cps.length?cps[cps.length-1]:null)}
 function die(){mode='dead';tD=performance.now();AU.stop();AU.sfx('die');shk=save.calm||!save.shake?0:16;
  const px=S.n*DT*lv.spd+17;for(let i=0;i<30;i++)spark(px,S.y+17,(Math.random()-.5)*700,(Math.random()-.5)*700,.8,6,SK[save.skin][1],900);rec(false)}
@@ -258,14 +263,16 @@ function pause(){if(mode!=='play'&&mode!=='count')return;mode='pause';AU.stop();
 function resume(){hideAll();mode='count';tC=performance.now()}
 function endScreen(w){mode='end';$('#hud').hidden=true;const id=lv.d.id,b=save.best[id]||0;
  $('#et').textContent=w?'Track cleared':'Crashed';
- $('#es').textContent=w?`Cleared in ${att} ${att===1?'attempt':'attempts'}.`:(lv.d.endless?`You ran ${pct()} m. Best is ${b} m.`:`You reached ${pct()}%. Best is ${b}%.`);
+ $('#es').textContent=(w?`Cleared in ${att} ${att===1?'attempt':'attempts'}.`:(lv.d.endless?`You ran ${pct()} m. Best is ${b} m.`:`You reached ${pct()}%. Best is ${b}%.`))+` Best flow x${maxFlow}.`;
  $('#next').hidden=!w||!LV[cur+1];show('end')}
 function tick(){
  R.py=S.y;if(lv.gen)lv.gen(S.n*DT*lv.spd+W*2);
  const lim=(S.n+1)*DT;while(evq.length&&evq[0][0]<lim){const e=evq.shift();held=e[1];if(e[1])edge=true}
  const was=S.g,vy=S.vy,cp0=S.cp,r=step(S,lv,edge||held,save.forgive);edge=false;
  const px=S.n*DT*lv.spd;
- if(S.jump){S.jump=false;AU.sfx('jump')}
+ if(S.jump){S.jump=false;AU.sfx('jump');const bp=((S.n*DT/lv.bd)%1+1)%1,off=Math.min(bp,1-bp);
+  if(off<.11){flow=Math.min(8,flow+1);maxFlow=Math.max(maxFlow,flow);AU.sfx('perfect');const bx=S.n*DT*lv.spd+17;for(let i=0;i<8;i++)spark(bx,S.y+17,(Math.random()-.5)*260,-Math.random()*220,.55,4,'#ffd34f',500)}
+  else if(flow>0)flow=0}
  if(S.g&&!was&&vy>300){AU.sfx('land');for(let i=0;i<4;i++)spark(px+17,S.y+PS,(Math.random()-.5)*160,-Math.random()*90,.3,3,'#fff',300)}
  R.rot=S.g?R.rot+(Math.round(R.rot/90)*90-R.rot)*.35:R.rot+540*DT*S.d;
  if(S.cp!==cp0){AU.sfx('cp');if(practice)cps.push({...S})}
@@ -273,7 +280,7 @@ function tick(){
  if(r===1)die();else if(r===2)win()}
 
 /* ---------- rendering ---------- */
-const c=$('#g'),ctx=c.getContext('2d');
+const c=$('#g'),ctx=c.getContext('2d'),beatEl=$('#beat');
 const rr=(x,y,w,h,r)=>{ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,r):ctx.rect(x,y,w,h)};
 function bg(hue,cx,pul,th){
  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,`hsl(${hue},60%,${7+pul*6}%)`);g.addColorStop(1,`hsl(${(hue+40)%360},55%,${16+pul*8}%)`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
@@ -317,7 +324,9 @@ function render(dt){
  if(mode==='count'){ctx.fillText(Math.max(1,3-Math.floor((performance.now()-tC)/500)),W/2,H/2+40)}
  else if(mode==='dead'){ctx.globalAlpha=.7;ctx.font='900 90px "Trebuchet MS",sans-serif';ctx.fillText(lv.d.endless?pct()+' m':pct()+'%',W/2,H/2);ctx.globalAlpha=1}
  if(lv&&S&&mode!=='menu'){const p=pct();if(p!==lastP){lastP=p;$('#pt').textContent=lv.d.endless?p+' m':p+'%';$('#pf').style.width=(lv.d.endless?100:p)+'%'}
-  const a=`Attempt ${att}${practice?', practice mode':''}`;if(a!==lastA){lastA=a;$('#at').textContent=a}}}
+  const nearBeat=mode==='play'&&Math.min(ph,1-ph)<.14;beatEl.classList.toggle('on',nearBeat);
+  const a=`Attempt ${att}${practice?', practice mode':''}`;if(a!==lastA){lastA=a;$('#at').textContent=a}
+  if(flow!==lastFlow){lastFlow=flow;const fe=$('#flow');fe.textContent=flow>0?`FLOW x${flow}`:'FLOW READY';fe.classList.toggle('on',flow>0)}}}
 
 /* ---------- main loop: the sim chases the audio clock, so music and obstacles cannot drift ---------- */
 let lastT=0;

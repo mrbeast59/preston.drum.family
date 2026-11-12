@@ -136,6 +136,7 @@ const ui = {
   rank: $('scoreRank'),
   combo: $('combo'),
   stunts: $('stuntCount'),
+  nextStop: $('nextStop'),
   minimap: $('minimap'),
   compass: $('compass'),
   eventCard: $('eventCard'),
@@ -3689,6 +3690,15 @@ function updateHud(dt) {
   ui.combo.textContent = `x${game.multiplier.toFixed(1)}`;
   ui.combo.classList.toggle('hot', game.multiplier > 1.4);
   ui.stunts.textContent = `ACTIVITIES ${game.done.size} / ${activityTotal}`;
+  let next = null, nextDistance = Infinity;
+  for (const a of activities) {
+    if (a.done) continue;
+    const distance = Math.hypot(car.x - a.x, car.z - a.z);
+    if (distance < nextDistance) { next = a; nextDistance = distance; }
+  }
+  ui.nextStop.innerHTML = next
+    ? `<b>NEXT · ${nextDistance < 12 ? 'HERE' : `${Math.round(nextDistance)} M`}</b><br>${next.name.toUpperCase()}`
+    : '<b>ALL</b> ACTIVITIES CLEARED';
   fpsFrames++;
   fpsClock += dt;
   if (fpsClock > .5) {

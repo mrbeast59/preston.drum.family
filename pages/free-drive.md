@@ -1,6 +1,6 @@
 ---
 layout: game
-title: "Forza Horizon 10"
+title: "Shibuya Street Run"
 ---
 
 <style>
@@ -38,6 +38,12 @@ title: "Forza Horizon 10"
   #street .meta { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 9px; font-weight: 700; letter-spacing: .08em; color: #9fb0c2; }
   #mult.hot { color: #ffd166; text-shadow: 0 0 12px rgba(255, 209, 102, .5); }
   #street .best { margin-top: 5px; font-size: 8px; letter-spacing: .1em; color: #77889a; }
+  #trial { position: absolute; top: 18px; left: 50%; width: 246px; box-sizing: border-box; padding: 10px 14px 9px; text-align: center; border-top: 2px solid #52e5ff; opacity: 0; visibility: hidden; transform: translate(-50%, -8px); transition: opacity .2s, transform .2s, visibility .2s; }
+  #trial.on { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+  #trial .kick { color: #52e5ff; font-size: 8px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }
+  #trial .timer { margin-top: 2px; font-size: 28px; line-height: 1; font-weight: 800; font-style: italic; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+  #trial .scoreline { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; color: #aeb9c7; font-size: 8px; font-weight: 700; letter-spacing: .1em; }
+  #trial .scoreline b { color: #ffd166; }
   #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 5; background: radial-gradient(ellipse at 50% 46%, transparent 50%, rgba(2, 6, 12, .44) 100%); }
   #garage { position: fixed; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; padding: 24px; overflow: auto; background: radial-gradient(circle at 50% 30%, rgba(17, 31, 50, .82), rgba(4, 8, 14, .96)); backdrop-filter: blur(12px); }
   #garage.open { display: flex; }
@@ -67,6 +73,10 @@ title: "Forza Horizon 10"
     .garage-actions span { display: none; }
     #garage-close { width: 100%; }
     #help { display: none; }
+    #trial { top: 12px; right: 12px; left: auto; width: 190px; padding: 8px 10px 7px; transform: translateY(-8px); }
+    #trial.on { transform: none; }
+    #trial .timer { font-size: 22px; }
+    #trial .scoreline { font-size: 7px; }
     #speedo { width: 165px; right: 12px; bottom: 12px; padding: 11px 14px 10px; }
     #speed { font-size: 48px; }
     #minimap { width: 120px; height: 120px; left: 12px; bottom: 12px; padding: 6px; }
@@ -92,6 +102,7 @@ title: "Forza Horizon 10"
     <div><b>SPACE</b> handbrake</div>
     <div><b>R</b> reset &nbsp; <b>C</b> camera</div>
     <div><b>M</b> sound &nbsp; <b>G</b> garage</div>
+    <div><b>T</b> 60-second drift trial</div>
     <div><b>GOLD RINGS</b> collect for score</div>
     <div><b>CYAN DECKS</b> hit the sky stunts</div>
   </div>
@@ -110,14 +121,19 @@ title: "Forza Horizon 10"
     <div class="best">BEST <span id="best">0</span></div>
   </div>
   <canvas id="minimap" width="180" height="180"></canvas>
+  <div id="trial" class="panel">
+    <div class="kick">Shibuya drift trial</div>
+    <div class="timer" id="trialTime">1:00</div>
+    <div class="scoreline"><b id="trialScore">0 PTS</b><span id="trialBest">BEST 0</span></div>
+  </div>
   <div id="toast"></div>
 </div>
 <div id="vignette"></div>
 <div id="garage" role="dialog" aria-modal="true" aria-label="Choose a car" aria-hidden="true">
   <div class="garage-panel">
-    <div class="garage-kicker">Shibuya Underground</div>
+    <div class="garage-kicker">Shibuya Street Run · Night Circuit</div>
     <h2>Choose your ride</h2>
-    <p class="garage-sub">Every build has its own grip, drift angle and top speed. Press <b>G</b> anytime to switch, or hit the streets and find the cyan sky decks.</p>
+    <p class="garage-sub">Every build has its own grip, drift angle and top speed. Press <b>G</b> anytime to switch, or hit the streets and find the cyan sky decks. Press <b>T</b> on the road for a 60-second drift trial.</p>
     <div id="car-list" class="car-list"></div>
     <div class="garage-actions">
       <button id="garage-close" type="button">HIT THE STREETS</button>
@@ -996,7 +1012,7 @@ title: "Forza Horizon 10"
       g.font = '700 70px Arial, sans-serif';
       g.textAlign = 'center';
       g.textBaseline = 'middle';
-      g.fillText('GT3 RS', w / 2, h / 2 + 3);
+      g.fillText('APEX GT', w / 2, h / 2 + 3);
       g.fillStyle = '#9ba3a8';
       g.fillRect(30, h - 18, w - 60, 4);
     }),
@@ -1329,7 +1345,7 @@ title: "Forza Horizon 10"
     { id: 'midnight', name: 'Midnight Drift', tag: 'Loose rear, carries speed', color: 0x2f6bff, accel: 19, top: 71, grip: 10.2, driftGrip: .82, handbrakeDrag: 2, driftDrag: .08, steer: .74, yaw: 15, driftYaw: 21, speed: 3.7, gripBar: 3.1, driftBar: 5 },
     { id: 'solar', name: 'Solar Apex', tag: 'Top speed monster', color: 0xffb21a, accel: 22.4, top: 88, grip: 12.1, driftGrip: 1.45, handbrakeDrag: 2.8, driftDrag: .18, steer: .65, yaw: 13.2, driftYaw: 17, speed: 5, gripBar: 4, driftBar: 2.8 },
     { id: 'mint', name: 'Mint Machine', tag: 'Grip for days', color: 0x2fe0a4, accel: 18.2, top: 68, grip: 13.4, driftGrip: 1.55, handbrakeDrag: 3, driftDrag: .22, steer: .76, yaw: 13.6, driftYaw: 16.5, speed: 3.2, gripBar: 5, driftBar: 3.2 },
-    { id: 'gt3rs', name: 'Porsche 911 GT3 RS', tag: 'Track-bred flat-six', color: 0xd6d7d2, accel: 23.5, top: 90, grip: 14.2, driftGrip: 1.15, handbrakeDrag: 2.2, driftDrag: .1, steer: .75, yaw: 15.5, driftYaw: 20, speed: 5.5, gripBar: 5, driftBar: 4.1 }
+    { id: 'gt3rs', name: 'Apex GT', tag: 'Track-bred flat-six', color: 0xd6d7d2, accel: 23.5, top: 90, grip: 14.2, driftGrip: 1.15, handbrakeDrag: 2.2, driftDrag: .1, steer: .75, yaw: 15.5, driftYaw: 20, speed: 5.5, gripBar: 5, driftBar: 4.1 }
   ];
   const CAR_KEY = 'forza.car.v1';
   let selectedCarIndex = 0;
@@ -1972,13 +1988,14 @@ title: "Forza Horizon 10"
       return;
     }
     if (garageOpen) return;
-    const watched = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyR', 'KeyC', 'KeyM'];
+    const watched = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyR', 'KeyC', 'KeyM', 'KeyT'];
     if (watched.includes(e.code)) e.preventDefault();
     keys[e.code] = true;
     if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) initAudio();
     if (e.code === 'KeyR' && !e.repeat) resetCar();
     if (e.code === 'KeyC' && !e.repeat) toggleCamera();
     if (e.code === 'KeyM' && !e.repeat) toggleSound();
+    if (e.code === 'KeyT' && !e.repeat) startDriftTrial();
   });
 
   window.addEventListener('keyup', (e) => {
@@ -2358,6 +2375,22 @@ title: "Forza Horizon 10"
   let ringTime = 0;
   let ringResetTimer = 0;
 
+  const trialEl = document.getElementById('trial');
+  const trialTimeEl = document.getElementById('trialTime');
+  const trialScoreEl = document.getElementById('trialScore');
+  const trialBestEl = document.getElementById('trialBest');
+  const TRIAL_KEY = 'shibuya.drift.best.v1';
+  let trialBest = 0;
+  try {
+    const storedTrial = Math.floor(Number(localStorage.getItem(TRIAL_KEY)));
+    if (Number.isFinite(storedTrial) && storedTrial > 0) trialBest = storedTrial;
+  } catch (e) {}
+  const driftTrial = { active: false, time: 0, duration: 60, startScore: 0, result: 0, hideAt: 0 };
+  const trialClock = (seconds) => {
+    const whole = Math.max(0, Math.ceil(seconds));
+    return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+  };
+
   const garageEl = document.getElementById('garage');
   const carListEl = document.getElementById('car-list');
   const garageCloseEl = document.getElementById('garage-close');
@@ -2394,15 +2427,18 @@ title: "Forza Horizon 10"
   }
 
   function setGarage(open) {
+    if (!open && garageEl.contains(document.activeElement)) document.activeElement.blur();
     garageOpen = open;
     garageEl.classList.toggle('open', open);
+    garageEl.inert = !open;
     garageEl.setAttribute('aria-hidden', String(!open));
     for (const key in keys) keys[key] = false;
     if (open) {
       renderGarage();
+      garageCloseEl.focus({ preventScroll: true });
     } else {
       initAudio();
-      showToast('WASD drive · SPACE drift · cyan decks = air time', 4200);
+      showToast('WASD drive · SPACE drift · T drift trial · cyan decks = air time', 4200);
     }
   }
 
@@ -2420,6 +2456,55 @@ title: "Forza Horizon 10"
     toastEl.classList.add('on');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove('on'), duration);
+  }
+
+  function updateTrialPanel() {
+    trialTimeEl.textContent = driftTrial.active ? trialClock(driftTrial.time) : 'FINAL';
+    trialScoreEl.textContent = `${Math.max(0, Math.floor(driftTrial.active ? state.score - driftTrial.startScore : driftTrial.result)).toLocaleString('en-US')} PTS`;
+    trialBestEl.textContent = `BEST ${trialBest.toLocaleString('en-US')}`;
+  }
+
+  function startDriftTrial() {
+    if (driftTrial.active) {
+      showToast('Drift trial already running', 1200);
+      return;
+    }
+    driftTrial.active = true;
+    driftTrial.time = driftTrial.duration;
+    driftTrial.startScore = state.score;
+    driftTrial.result = 0;
+    driftTrial.hideAt = 0;
+    trialEl.classList.add('on');
+    updateTrialPanel();
+    showToast('DRIFT TRIAL · 60 seconds · chain drifts for score', 3400);
+  }
+
+  function endDriftTrial() {
+    const runScore = Math.max(0, Math.round(state.score - driftTrial.startScore));
+    const newBest = runScore > trialBest;
+    driftTrial.active = false;
+    driftTrial.result = runScore;
+    driftTrial.hideAt = performance.now() + 5000;
+    if (newBest) {
+      trialBest = runScore;
+      try { localStorage.setItem(TRIAL_KEY, String(trialBest)); } catch (e) {}
+    }
+    updateTrialPanel();
+    showToast(`TRIAL FINAL · ${runScore.toLocaleString('en-US')} PTS${newBest ? ' · NEW BEST' : ''}`, 4400);
+  }
+
+  function updateDriftTrial(dt) {
+    if (driftTrial.active) {
+      driftTrial.time = Math.max(0, driftTrial.time - dt);
+      if (driftTrial.time === 0) {
+        endDriftTrial();
+        return;
+      }
+      updateTrialPanel();
+    } else if (driftTrial.hideAt && performance.now() >= driftTrial.hideAt) {
+      driftTrial.hideAt = 0;
+      trialEl.classList.remove('on');
+    }
   }
 
   function trackBest() {
@@ -2645,6 +2730,7 @@ title: "Forza Horizon 10"
         steps++;
       }
       updateAudio((keys.KeyW || keys.ArrowUp) ? 1 : 0);
+      updateDriftTrial(rawDt);
     }
     updateCamera(rawDt);
     updateHud();
@@ -2669,6 +2755,7 @@ title: "Forza Horizon 10"
   window.__forza = {
     state, blocks, traffic, camera, renderer, scene, rings, hero, CARS, stuntSurfaces, stuntDecks, surfaceAt, selectCar,
     get activeCar() { return activeCar; },
-    get garageOpen() { return garageOpen; }
+    get garageOpen() { return garageOpen; },
+    get driftTrial() { return driftTrial; }
   };
 </script>

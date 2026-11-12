@@ -55,6 +55,8 @@ permalink: /japan-drive/
   #combo { color: var(--gold); }
   #combo.hot { text-shadow: 0 0 12px rgba(255, 209, 102, .55); }
   #stuntCount { margin-top: 4px; color: #7f949b; font-size: 7px; letter-spacing: .1em; }
+  #nextStop { margin-top: 3px; color: #9db0b5; font-size: 7px; line-height: 1.35; font-weight: 700; letter-spacing: .05em; }
+  #nextStop b { color: var(--cyan); font-weight: 800; }
   #eventCard { position: absolute; top: 78px; left: 50%; min-width: 300px; padding: 10px 18px 11px; text-align: center; transform: translate(-50%, -7px); opacity: 0; transition: opacity .18s, transform .18s; }
   #eventCard.on { opacity: 1; transform: translate(-50%, 0); }
   #eventCard .kicker { color: var(--cyan); font-size: 8px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }
@@ -151,6 +153,7 @@ permalink: /japan-drive/
     <div id="score">0</div>
     <div class="row"><span id="scoreRank">ROOKIE</span><span id="combo">x1.0</span></div>
     <div id="stuntCount">ACTIVITIES 0 / 0</div>
+    <div id="nextStop">NEXT · --</div>
   </div>
 
   <div id="minimapPanel" class="panel"><canvas id="minimap" width="364" height="364"></canvas></div>
@@ -216,4 +219,4 @@ permalink: /japan-drive/
 <script type="importmap">
   { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
 </script>
-<script type="module" src="/assets/js/japan-drive.js"></script>
+<script type="module" src="/assets/js/japan-drive.js?v=20261112"></script>
